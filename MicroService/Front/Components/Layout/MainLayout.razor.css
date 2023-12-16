@@ -3,7 +3,49 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    color: #333; /* Couleur de la police principale */
+    background-image: url('PokemonBG.png'); /* Image de fond avec dégradé pastel */
 }
+
+/* Styles for le dégradé pour la couleur de fond */
+.page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    opacity: 0.9; /* Opacité du dégradé */
+}
+
+/* Styles for le dégradé pour la couleur de fond dans le top-row */
+.top-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, #a6ffb6 0%, #cbfff6 70%); /* Dégradé de couleur de fond pastel */
+    z-index: -1;
+    opacity: 0.9; /* Opacité du dégradé */
+}
+
+/* Styles for le dégradé pour la couleur de fond dans le sidebar */
+.sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, #0045ac 0%, #6688cc 70%); /* Dégradé de couleur de fond pastel */
+    z-index: -1;
+    opacity: 0.9; /* Opacité du dégradé */
+}
+
+
 
 /* Styles for the main content area */
 main {
@@ -31,12 +73,14 @@ main {
     white-space: nowrap;
     margin-left: 1.5rem;
     text-decoration: none;
+    color: #555; /* Couleur de la police pour les liens */
 }
 
 /* Styles for link hover effect in the top row */
 .top-row a:hover,
 .top-row .btn-link:hover {
     text-decoration: underline;
+    color: #000; /* Couleur de la police au survol */
 }
 
 /* Styles for the first child link in the top row */
