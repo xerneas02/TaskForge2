@@ -10,7 +10,7 @@ using pokemon.Data;
 namespace Pokemon.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231208152045_Init")]
+    [Migration("20231222141616_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -25,15 +25,15 @@ namespace Pokemon.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Ability")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Nature")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Nom")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Shiny")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TrainerId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");

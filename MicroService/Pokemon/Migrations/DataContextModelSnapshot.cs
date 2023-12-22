@@ -22,15 +22,15 @@ namespace Pokemon.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Ability")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Nature")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Nom")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Shiny")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TrainerId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");

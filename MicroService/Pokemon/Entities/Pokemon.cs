@@ -25,15 +25,19 @@
     public class Pokemon
     {
         public int Id { get; set; }
+        public int TrainerId { get; set; }
+        public bool Shiny { get; set; }
         public string Nom { get; set; }
 
         public Type Type { get; set; }
 
-        public Pokemon(int id, string nom, Type type)
+        public Pokemon(int id, int trainerId, string nom, Type type, bool shiny)
         {
             Id = id;
+            TrainerId = trainerId;
             Nom = nom;
             Type = type;
+            Shiny = shiny;
         }
         
         

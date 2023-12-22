@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
     color: #333; /* Couleur de la police principale */
-    background-image: url('PokemonBG.png'); /* Image de fond avec dégradé pastel */
+    background-image: url('PokemonBG.png');
 }
 
 /* Styles for le dégradé pour la couleur de fond */
