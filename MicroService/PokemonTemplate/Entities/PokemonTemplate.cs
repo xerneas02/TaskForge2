@@ -1,4 +1,4 @@
-﻿namespace pokemon.Entities
+﻿namespace pokemonTemplate.Entities
 {
     public enum PokemonType
     {
@@ -22,22 +22,18 @@
         Fairy
     }
 
-    public class Pokemon
+    public class PokemonTemplate
     {
         public int Id { get; set; }
-        public int TrainerId { get; set; }
-        public bool Shiny { get; set; }
         public string Nom { get; set; }
 
         public PokemonType Type { get; set; }
 
-        public Pokemon(int id, int trainerId, string nom, PokemonType type, bool shiny)
+        public PokemonTemplate(int id, string nom, PokemonType type)
         {
             Id = id;
-            TrainerId = trainerId;
             Nom = nom;
             Type = type;
-            Shiny = shiny;
         }
         
         
