@@ -38,6 +38,16 @@ namespace pokemon.Controllers
              return Ok(await _context.Pokemons.FirstOrDefaultAsync(user => user.Id == id));
         }
 
+        [HttpGet("trainer/{trainerId}")]
+        public async Task<ActionResult<IEnumerable<Entities.Pokemon>>> GetTrainerPokemons(int trainerId)
+        {
+             var trainerPokemons = await _context.Pokemons
+                                    .Where(pokemon => pokemon.TrainerId == trainerId)
+                                    .ToListAsync();
+
+            return Ok(trainerPokemons);
+        }
+
         // POST api/<UserController>
         [HttpPost]
         public async Task<ActionResult<Entities.Pokemon>> PostPokemon(Entities.Pokemon pokemon)
