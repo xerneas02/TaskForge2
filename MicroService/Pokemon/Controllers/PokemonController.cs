@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using pokemon.Data;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -13,6 +17,7 @@ namespace pokemon.Controllers
     public class PokemonController : ControllerBase
     {
         private readonly DataContext _context;
+        
 
         public PokemonController(DataContext context)
         {
@@ -43,6 +48,76 @@ namespace pokemon.Controllers
             await _context.SaveChangesAsync();
             // On retourne l'utilisateur nouvellement crée en appelant la fonction CreatedAtAction
             return CreatedAtAction(nameof(GetPokemon), new { id = pokemon.Id }, pokemon);
+        }
+
+        [HttpPost("AddRandomPokemon/{trainerId}")]
+        public async Task<ActionResult<Entities.Pokemon>> AddRandomPokemon(int trainerId)
+        {
+            try
+            {
+                // Retrieve a random Pokemon template from the PokemonTemplate microservice
+                Entities.Pokemon randomTemplate = GetRandomPokemonTemplate();
+
+                // Create a new Pokemon using the retrieved template and provided trainer ID
+                Entities.Pokemon newPokemon = new Entities.Pokemon(
+                    trainerId,
+                    randomTemplate.Nom,
+                    randomTemplate.Type,
+                    false // Set the Shiny property as needed
+                );
+
+                // Add the new Pokemon to the Pokemon microservice database
+                _context.Pokemons.Add(newPokemon);
+                await _context.SaveChangesAsync();
+
+                // Return the newly created Pokemon
+                return CreatedAtAction(nameof(GetPokemon), new { id = newPokemon.Id }, newPokemon);
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that might occur during the process
+                return BadRequest($"An error occurred: {ex.Message}");
+            }
+        }
+
+        private Entities.Pokemon GetRandomPokemonTemplate()
+        {
+            try
+            {
+                // Make an HTTP request to the PokemonTemplate microservice endpoint
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    string pokemonTemplateApiUrl = "http://localhost:5227/api/pokemonTemplate/random";
+                    HttpResponseMessage response = httpClient.GetAsync(pokemonTemplateApiUrl).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string jsonResult = response.Content.ReadAsStringAsync().Result;
+
+                        var templateData = new { Nom = "", Type = Entities.PokemonType.Normal};
+                        var randomTemplate = JsonConvert.DeserializeAnonymousType(jsonResult, templateData);
+
+                        // Create a new Pokemon using the retrieved template and provided trainer ID
+                        Entities.Pokemon newPokemon = new Entities.Pokemon
+                        (
+                            -1,
+                            randomTemplate.Nom,
+                            randomTemplate.Type,
+                            false // Set the Shiny property as needed
+                        );
+                        return newPokemon;
+                    }
+                    else
+                    {
+                        throw new Exception($"Failed to retrieve random Pokemon template. Status code: {response.StatusCode}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that might occur during the process
+                throw new Exception($"An error occurred while getting a random Pokemon template: {ex.Message}");
+            }
         }
     }
 }

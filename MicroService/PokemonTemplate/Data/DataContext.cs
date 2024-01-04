@@ -14,6 +14,6 @@ namespace pokemonTemplate.Data
         {
             options.UseSqlite(Configuration.GetConnectionString("WebApiDatabase"));
         }
-        public DbSet<Entities.PokemonTemplate> Pokemons { get; set; }
+        public DbSet<Entities.PokemonTemplate> PokemonTemplates { get; set; }
     }
 }

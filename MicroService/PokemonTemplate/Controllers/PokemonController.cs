@@ -10,27 +10,36 @@ namespace pokemonTemplate.Controllers
     [ApiController]
 
     
-    public class PokemonController : ControllerBase
+    public class PokemonTemplateController : ControllerBase
     {
         private readonly DataContext _context;
 
-        public PokemonController(DataContext context)
+        public PokemonTemplateController(DataContext context)
         {
             _context = context;
         }
 
         // GET: api/<UserController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Entities.PokemonTemplate>>> GetPokemonsTemplate()
+        public async Task<ActionResult<IEnumerable<Entities.PokemonTemplate>>> GetPokemonTemplates()
         {
-            return Ok(await _context.Pokemons.ToListAsync());
+            return Ok(await _context.PokemonTemplates.ToListAsync());
         }
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Entities.PokemonTemplate>> GetPokemonTemplate(int id)
         {
-             return Ok(await _context.Pokemons.FirstOrDefaultAsync(user => user.Id == id));
+             return Ok(await _context.PokemonTemplates.FirstOrDefaultAsync(user => user.Id == id));
+        }
+
+        [HttpGet("random")]
+        public async Task<ActionResult<Entities.PokemonTemplate>> Random()
+        {
+            int totalCount = await _context.PokemonTemplates.CountAsync();
+            int randomIndex = new Random().Next(0, totalCount);
+            
+            return Ok(await _context.PokemonTemplates.FirstOrDefaultAsync(user => user.Id == randomIndex));
         }
 
         // POST api/<UserController>
@@ -38,7 +47,7 @@ namespace pokemonTemplate.Controllers
         public async Task<ActionResult<Entities.PokemonTemplate>> PostPokemonTemplate(Entities.PokemonTemplate pokemon)
         {
             // On ajoute notre utilisateur dans la base
-            _context.Pokemons.Add(pokemon);
+            _context.PokemonTemplates.Add(pokemon);
             // On sauvegarde la modification
             await _context.SaveChangesAsync();
             // On retourne l'utilisateur nouvellement crée en appelant la fonction CreatedAtAction
