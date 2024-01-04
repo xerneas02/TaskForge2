@@ -113,7 +113,7 @@ namespace pokemon.Controllers
                             -1,
                             randomTemplate.Nom,
                             randomTemplate.Type,
-                            false // Set the Shiny property as needed
+                            false
                         );
                         return newPokemon;
                     }
@@ -143,7 +143,7 @@ namespace pokemon.Controllers
                     trainerId,
                     randomTemplate.Nom,
                     randomTemplate.Type,
-                    false // Set the Shiny property as needed
+                    ShouldPokemonBeShiny()
                 );
 
                 // Add the new Pokemon to the Pokemon microservice database
@@ -198,6 +198,13 @@ namespace pokemon.Controllers
                 // Handle any exceptions that might occur during the process
                 throw new Exception($"An error occurred while getting Pokemon template with ID {templateId}: {ex.Message}");
             }
+
+        }
+
+        private bool ShouldPokemonBeShiny()
+        {
+            Random random = new Random();
+            return random.Next(512) == 0; // Probability of 1/512
         }
     }
 }
