@@ -73,7 +73,7 @@ namespace pokemon.Controllers
                     trainerId,
                     randomTemplate.Nom,
                     randomTemplate.Type,
-                    false // Set the Shiny property as needed
+                    ShouldPokemonBeShiny()
                 );
 
                 // Add the new Pokemon to the Pokemon microservice database
