@@ -20,6 +20,7 @@ builder.Services
         options.LoginPath = "/login";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(6000);
     });
+
 builder.Services.AddAuthenticationCore();
 builder.Services.AddHttpClient();
 builder.Services.AddCascadingAuthenticationState();

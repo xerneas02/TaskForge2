@@ -93,6 +93,7 @@ namespace UserService.Controllers
 
         // POST: api/Users/register
         [HttpPost("register")]
+        [IgnoreAntiforgeryToken]
         public async Task<ActionResult<User>> CreateUser(UserCreateModel userPayload)
         {
             var user = new User
