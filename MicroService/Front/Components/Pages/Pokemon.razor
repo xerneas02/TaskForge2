@@ -1,0 +1,55 @@
+@page "/pokemon"
+@using System.Text.RegularExpressions
+@inject HttpClient httpClient
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider authStateProvider
+@using System
+@using Newtonsoft.Json
+
+<h3>Obtenir un Pokemon.</h3>
+
+<button @onclick="AjouterPokemon">Ajouter un Pokemon</button>
+
+@code {
+    private string? userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Récupérer l'ID de l'utilisateur à partir du contexte d'authentification
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        userId = user.FindFirst("sub")?.Value;
+    }
+
+    private async Task AjouterPokemon()
+    {
+        try
+        {
+            // Vérifier que userId n'est pas null ou vide avant de faire la requête
+            if (string.IsNullOrEmpty(userId))
+            {
+                // Gérer le cas où l'ID de l'utilisateur n'est pas disponible
+                return;
+            }
+
+            // Faire une requête GET vers le endpoint approprié pour ajouter un Pokemon
+            HttpResponseMessage response = await httpClient.PostAsync($"http://localhost:5227/api/Pokemon/AddRandomPokemon/{userId}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Afficher une alerte pour informer l'utilisateur que le Pokemon a été ajouté avec succès
+                await JSRuntime.InvokeVoidAsync("alert", "Pokemon ajouté avec succès !");
+            }
+            else
+            {
+                // Afficher une alerte en cas d'erreur
+                await JSRuntime.InvokeVoidAsync("alert", "Une erreur s'est produite lors de l'ajout du Pokemon.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Gérer les exceptions
+            Console.WriteLine($"Une exception s'est produite : {ex.Message}");
+        }
+    }
+}
