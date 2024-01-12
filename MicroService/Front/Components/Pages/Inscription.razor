@@ -47,13 +47,13 @@
     private string passwordError = "";
     private string confirmPasswordError = "";
 
-    [Inject] private NavigationManager navigation {get; set; }
+    [Inject] private NavigationManager? navigation {get; set; }
 
-    private List<UserDTO> users;
+    private List<UserDTO>? users;
 
-        private async Task HandleFormSubmit()
+    private async Task HandleFormSubmit()
     {
-        if (ValidateUsername() && ValidateEmail() && ValidateBirthday() && ValidatePassword() && ValidateConfirmPassword())
+        if (ValidateUsername() && ValidateEmail() && ValidateBirthday() && ValidatePassword() && ValidateConfirmPassword() && navigation != null)
         {
             await PostUser();
             navigation.NavigateTo("/login", true);
@@ -67,7 +67,10 @@
 
     private string GetConcatenatedEmails()
     {
-        return string.Join(", ", users.Select(user => user.Email));
+        if(users != null) 
+            return string.Join(", ", users.Select(user => user.Email));
+
+        return "";
     }
 
     private void GetUserList()
@@ -96,42 +99,43 @@
         }
     }
 
-    private async Task PostUser()
+    private async Task<bool> PostUser()
     {
         try
         {
             var newUser = new UserCreateModel
-        {
-            Name = username,
-            Email = email,
-            Password = password
-        };
-
-            using (HttpClient httpClient = new HttpClient())
             {
-                string usersApiUrl = "http://localhost:5001/api/Users/register";
-                string jsonContent = JsonConvert.SerializeObject(newUser);
-                StringContent content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+                Name = username,
+                Email = email,
+                Password = password
+            };
 
-            HttpResponseMessage response = await httpClient.PostAsync(usersApiUrl, content);
+                using (HttpClient httpClient = new HttpClient())
+                {
+                    string usersApiUrl = "http://localhost:5001/api/Users/register";
+                    string jsonContent = JsonConvert.SerializeObject(newUser);
+                    StringContent content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
-            if (response.IsSuccessStatusCode)
-            {
-            }
-            else
-            {
-                throw new Exception($"Failed to register user. Status code: {response.StatusCode}");
+                HttpResponseMessage response = await httpClient.PostAsync(usersApiUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    throw new Exception($"Failed to register user. Status code: {response.StatusCode}");
+                }
             }
         }
+        catch (Exception ex)
+        {
+            throw new Exception($"An error occurred while registering user: {ex.Message}");
+        }
     }
-    catch (Exception ex)
-    {
-        throw new Exception($"An error occurred while registering user: {ex.Message}");
-    }
-}
 
-    private void UpdateUsername(ChangeEventArgs e) {username = e.Value!.ToString();}
-    private void UpdateEmail(ChangeEventArgs e) {email = e.Value!.ToString();}
+    private void UpdateUsername(ChangeEventArgs e) {username = e.Value!.ToString()!;}
+    private void UpdateEmail(ChangeEventArgs e) {email = e.Value!.ToString()!;}
     private void UpdateBirthday(ChangeEventArgs e) 
     { 
         if (DateTime.TryParse(e.Value?.ToString(), out DateTime result))
@@ -139,14 +143,14 @@
             birthdate = result;
         }
     }
-    private void UpdatePassWord(ChangeEventArgs e) {password = e.Value!.ToString();}
-    private void UpdateConfirmPassWord(ChangeEventArgs e) {confirmPassword = e.Value!.ToString();}
+    private void UpdatePassWord(ChangeEventArgs e) {password = e.Value!.ToString()!;}
+    private void UpdateConfirmPassWord(ChangeEventArgs e) {confirmPassword = e.Value!.ToString()!;}
 
-    private bool validateForm()
+    private async Task<bool> validateForm()
     {
         if (ValidateUsername() && ValidateEmail() && ValidateBirthday() && ValidatePassword() && ValidateConfirmPassword())
         {
-            PostUser();
+            await PostUser();
             return true;
         }
         else
@@ -182,7 +186,7 @@
             return false;
         }
 
-        if (users.Any(u => u.Email == email))
+        if (users != null && users.Any(u => u.Email == email))
         {
             emailError = "L'adresse email est déjà existante.";
             return false;
