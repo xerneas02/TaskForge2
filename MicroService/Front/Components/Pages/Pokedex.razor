@@ -1,0 +1,48 @@
+﻿@page "/pokedex"
+
+<h3>Pokedex</h3>
+
+<PageTitle>Pokedex</PageTitle>
+
+@if (pokedex == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pokemon in pokedex)
+            {
+                <tr>
+                    <td>@pokemon.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private PokemonTemplate[]? pokedex;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(100);
+        pokedex = new[] { new PokemonTemplate { Name = "Limonde" },
+                          new PokemonTemplate { Name = "Melokrick"}
+        };
+    }
+
+
+    private class PokemonTemplate
+    {
+        public string? Name { get; set; }
+    }
+
+}
