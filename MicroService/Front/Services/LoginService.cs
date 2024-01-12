@@ -24,6 +24,11 @@ namespace Front.Services
                 Name = username,
             };
         }
+
+        public Task<HttpResponseMessage> TryLogin(string requestUrl)
+        {
+            return this._httpClient.GetAsync(requestUrl);
+        }
     }
 }
 
