@@ -16,16 +16,26 @@
 
     private async void HandleLogin()
     {
-        var user = loginService.AuthenticateUser(loginModel.Username, loginModel.Password);
-        if (user != null)
+        var gatewayUrl = "http://localhost:5052/api/User";
+        var endpoint = "/login";
+        var requestUrl = $"{gatewayUrl}{endpoint}name={loginModel.Username}pass={loginModel.Password}";
+        try
         {
-            var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(user);
+            // Effectuer la requête GET
+            HttpResponseMessage result = await loginService.TryLogin(requestUrl);
 
-            NavigationManager.NavigateTo("/");
+            if(result.IsSuccessStatusCode)
+            {
+                Console.WriteLine("YES YES YES YES YES");
+            }
+            else{
+                Console.WriteLine("NON NON NON NON NON");
+            }
         }
-        else
+        catch (Exception ex)
         {
-            // Handle failed authentication
+            // Gérer les erreurs (par exemple, afficher un message d'erreur)
+            // ...
         }
     }
 
