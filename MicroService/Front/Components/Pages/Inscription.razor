@@ -1,0 +1,174 @@
+@page "/inscription"
+@using System.Text.RegularExpressions
+@inject HttpClient httpClient
+@inject IJSRuntime JSRuntime
+@using System
+
+<h3>Inscription</h3>
+
+<body>
+    <form method="post" onsubmit="return validateForm()">
+        <div>
+            <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required @oninput="UpdateUsername" @onblur="(e) => ValidateUsername()" />
+            <div style="color:red;">@usernameError</div>
+        </div>
+        <div>
+            <input type="email" id="email" name="email" placeholder="Adresse e-mail" required @oninput="UpdateEmail" @onblur="(e) => ValidateEmail()" />
+            <div style="color:red;">@emailError</div>
+        </div>
+        <div>
+            <input type="date" id="birthdate" name="birthdate" required @oninput="UpdateBirthday" @onblur="(e) => ValidateBirthday()" />
+            <div style="color:red;">@birthdateError</div>
+        </div>
+        <div>
+            <input type="password" id="password" name="password" placeholder="Mot de passe" required @oninput="UpdatePassWord" @onblur="(e) => ValidatePassword()" />
+            <div style="color:red;">@passwordError</div>
+        </div>
+        <div>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirmer le mot de passe" required @oninput="UpdateConfirmPassWord" @onblur="(e) => ValidateConfirmPassword()" />
+            <div style="color:red;">@confirmPasswordError</div>
+        </div>
+        <button type="submit">S'inscrire</button>
+    </form>
+
+    @if (users != null)
+    {
+        <div>
+            <h4>Liste des e-mails des utilisateurs:</h4>
+            <div>@GetConcatenatedEmails()</div>
+        </div>
+    }
+
+</body>
+
+@code {
+    private string username = "";
+    private string email = "";
+    private DateTime birthdate;
+    private string password = "";
+    private string confirmPassword = "";
+
+    private string usernameError = "";
+    private string emailError = "";
+    private string birthdateError = "";
+    private string passwordError = "";
+    private string confirmPasswordError = "";
+
+    private List<UserDTO> users;
+
+    private string GetConcatenatedEmails()
+    {
+        return string.Join(", ", users.Select(user => user.Email));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await httpClient.GetFromJsonAsync<List<UserDTO>>("/api/User");
+    }
+
+    private void UpdateUsername(ChangeEventArgs e) {username = e.Value?.ToString();}
+    private void UpdateEmail(ChangeEventArgs e) {email = e.Value?.ToString();}
+    private void UpdateBirthday(ChangeEventArgs e) 
+    { 
+        if (DateTime.TryParse(e.Value?.ToString(), out DateTime result))
+        {
+            birthdate = result;
+        }
+    }
+    private void UpdatePassWord(ChangeEventArgs e) {password = e.Value?.ToString();}
+    private void UpdateConfirmPassWord(ChangeEventArgs e) {confirmPassword = e.Value?.ToString();}
+
+    private bool validateForm()
+    {
+        // Logique de validation du formulaire
+        return ValidateUsername() && ValidateEmail() && ValidateBirthday() && ValidatePassword() && ValidateConfirmPassword();
+    }
+
+    private bool ValidateUsername()
+    {
+        if (username.Contains(" "))
+        {
+            usernameError = "Le nom d'utilisateur ne doit pas contenir d'espaces";
+            return false;
+        }
+
+        if (username.Length < 5)
+        {
+            usernameError = "Le nom d'utilisateur doit avoir au moins 5 caractères.";
+            return false;
+        }
+
+        usernameError = "";
+        return true;
+    }
+
+    private bool ValidateEmail()
+    {
+        string emailPattern = @"^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$";
+        if (string.IsNullOrWhiteSpace(email) || !Regex.IsMatch(email, emailPattern))
+        {
+            emailError = "L'adresse email n'est pas valide.";
+            return false;
+        }
+
+        emailError = "";
+        return true;
+    }
+
+    private bool ValidateBirthday()
+    {
+        if (birthdate == DateTime.MinValue || DateTime.Now.Subtract(birthdate).TotalDays < 4745)
+        {
+            if (DateTime.Now.Subtract(birthdate).TotalDays < 0)
+            {
+                birthdateError = "Date invalide";
+                return false;
+            }
+            birthdateError = "Vous devez avoir au moins 13 ans.";
+            return false;
+        }
+
+        birthdateError = "";
+        return true;
+    }
+
+    private bool ValidatePassword()
+    {
+        bool hasUpperCase = password.Any(char.IsUpper);
+        bool hasDigit = password.Any(char.IsDigit);
+        bool hasSpecialChar = password.Any(c => !char.IsLetterOrDigit(c));
+        bool hasMinLength = password.Length >= 12;
+
+    if (!hasUpperCase) {
+        passwordError = "Le mot de passe doit contenir au moins une lettre majuscule";
+        return false;
+    }
+    else if (!hasDigit) {
+        passwordError = "Le mot de passe doit contenir au moins une chiffre";
+        return false;
+    }
+    else if (!hasSpecialChar) {
+        passwordError = "Le mot de passe doit contenir au moins un caractère spécial";
+        return false;
+    }
+    else if (!hasMinLength) {
+        passwordError = "Le mot de passe doit avoir une longueur d'au moins 12 caractères.";
+        return false;
+    }
+
+        passwordError = "";
+        return true;
+    }
+
+    private bool ValidateConfirmPassword()
+    {
+        if (confirmPassword != password)
+        {
+            confirmPasswordError = "Le mot de passe doit être le même!";
+            return false;
+        }
+
+        confirmPasswordError = "";
+        return true;
+    }
+}
