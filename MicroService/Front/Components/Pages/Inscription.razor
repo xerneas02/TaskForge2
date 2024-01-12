@@ -3,11 +3,12 @@
 @inject HttpClient httpClient
 @inject IJSRuntime JSRuntime
 @using System
+@using Newtonsoft.Json
 
 <h3>Inscription</h3>
 
 <body>
-    <form method="post" onsubmit="return validateForm()">
+    <form @onsubmit="HandleFormSubmit">
         <div>
             <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required @oninput="UpdateUsername" @onblur="(e) => ValidateUsername()" />
             <div style="color:red;">@usernameError</div>
@@ -38,6 +39,12 @@
             <div>@GetConcatenatedEmails()</div>
         </div>
     }
+    @if (users == null)
+    {
+        <div>
+            <h4>LError users</h4>
+        </div>
+    }
 
 </body>
 
@@ -54,17 +61,88 @@
     private string passwordError = "";
     private string confirmPasswordError = "";
 
+    [Inject] private NavigationManager navigation {get; set; }
+
     private List<UserDTO> users;
+
+        private async Task HandleFormSubmit()
+    {
+        if (ValidateUsername() && ValidateEmail() && ValidateBirthday() && ValidatePassword() && ValidateConfirmPassword())
+        {
+            await PostUser();
+            navigation.NavigateTo("/login", true);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(() => GetUserList());
+    }
 
     private string GetConcatenatedEmails()
     {
         return string.Join(", ", users.Select(user => user.Email));
     }
 
-    @* protected override async Task OnInitializedAsync()
+    private void GetUserList()
     {
-        users = await httpClient.GetFromJsonAsync<List<UserDTO>>("/api/User");
-    } *@
+        try
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = "http://localhost:5001/api/Users";
+                HttpResponseMessage response = httpClient.GetAsync(usersApiUrl).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string jsonResult = response.Content.ReadAsStringAsync().Result;
+                    users = JsonConvert.DeserializeObject<List<UserDTO>>(jsonResult)!;
+                }
+                else
+                {
+                    throw new Exception($"Failed to retrieve random Utilisateur template. Status code: {response.StatusCode}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"An error occurred while getting a random Utilisateur template: {ex.Message}");
+        }
+    }
+
+    private async Task PostUser()
+    {
+        try
+        {
+            var newUser = new UserCreateModel
+        {
+            Name = username,
+            Email = email,
+            Password = password
+        };
+
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = "http://localhost:5001/api/Users/register";
+                string jsonContent = JsonConvert.SerializeObject(newUser);
+                StringContent content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await httpClient.PostAsync(usersApiUrl, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+            }
+            else
+            {
+                throw new Exception($"Failed to register user. Status code: {response.StatusCode}");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        throw new Exception($"An error occurred while registering user: {ex.Message}");
+    }
+}
 
     private void UpdateUsername(ChangeEventArgs e) {username = e.Value!.ToString();}
     private void UpdateEmail(ChangeEventArgs e) {email = e.Value!.ToString();}
@@ -80,8 +158,15 @@
 
     private bool validateForm()
     {
-        // Logique de validation du formulaire
-        return ValidateUsername() && ValidateEmail() && ValidateBirthday() && ValidatePassword() && ValidateConfirmPassword();
+        if (ValidateUsername() && ValidateEmail() && ValidateBirthday() && ValidatePassword() && ValidateConfirmPassword())
+        {
+            PostUser();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private bool ValidateUsername()
@@ -108,6 +193,12 @@
         if (string.IsNullOrWhiteSpace(email) || !Regex.IsMatch(email, emailPattern))
         {
             emailError = "L'adresse email n'est pas valide.";
+            return false;
+        }
+
+        if (users.Any(u => u.Email == email))
+        {
+            emailError = "L'adresse email est déjà existante.";
             return false;
         }
 
