@@ -61,13 +61,13 @@
         return string.Join(", ", users.Select(user => user.Email));
     }
 
-    protected override async Task OnInitializedAsync()
+    @* protected override async Task OnInitializedAsync()
     {
         users = await httpClient.GetFromJsonAsync<List<UserDTO>>("/api/User");
-    }
+    } *@
 
-    private void UpdateUsername(ChangeEventArgs e) {username = e.Value?.ToString();}
-    private void UpdateEmail(ChangeEventArgs e) {email = e.Value?.ToString();}
+    private void UpdateUsername(ChangeEventArgs e) {username = e.Value!.ToString();}
+    private void UpdateEmail(ChangeEventArgs e) {email = e.Value!.ToString();}
     private void UpdateBirthday(ChangeEventArgs e) 
     { 
         if (DateTime.TryParse(e.Value?.ToString(), out DateTime result))
@@ -75,8 +75,8 @@
             birthdate = result;
         }
     }
-    private void UpdatePassWord(ChangeEventArgs e) {password = e.Value?.ToString();}
-    private void UpdateConfirmPassWord(ChangeEventArgs e) {confirmPassword = e.Value?.ToString();}
+    private void UpdatePassWord(ChangeEventArgs e) {password = e.Value!.ToString();}
+    private void UpdateConfirmPassWord(ChangeEventArgs e) {confirmPassword = e.Value!.ToString();}
 
     private bool validateForm()
     {
