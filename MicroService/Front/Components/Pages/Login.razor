@@ -6,7 +6,7 @@
 @using System.Text.Json
 @using System.Net.Http
 @using System.Text
-
+@using Newtonsoft.Json
 <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
     <InputText @bind-Value="loginModel.Username" />
     <InputText @bind-Value="loginModel.Password" type="password" />
@@ -23,7 +23,7 @@
         var endpoint = "/api/Users/login";
         var requestData = new { name = loginModel.Username,
                                 pass = loginModel.Password };
-        var jsonContent = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
+        var jsonContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
         
         try
         {
@@ -34,7 +34,7 @@
             {
                 string responseBody = await result.Content.ReadAsStringAsync();
                 Console.WriteLine(responseBody);
-                UserDTO user = JsonSerializer.Deserialize<UserDTO>(responseBody)!;
+                UserDTO user = JsonConvert.DeserializeObject<UserDTO>(responseBody)!;
                 var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(user);
                 NavigationManager.NavigateTo("/");    
             }
