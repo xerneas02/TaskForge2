@@ -47,6 +47,7 @@ namespace Front.Services
             {
                 var user = userSession.Value;
                 var claims = new[] {
+                    new Claim(ClaimTypes.SerialNumber, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.Name),
                     new Claim(ClaimTypes.Role, "User")
                 };

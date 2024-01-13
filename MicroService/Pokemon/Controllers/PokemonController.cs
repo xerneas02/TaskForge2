@@ -78,6 +78,7 @@ namespace pokemon.Controllers
                 Entities.Pokemon newPokemon = new Entities.Pokemon(
                     newId,
                     trainerId,
+                    randomTemplate.IdPokedex,
                     randomTemplate.Nom,
                     randomTemplate.Type,
                     ShouldPokemonBeShiny()
@@ -111,7 +112,7 @@ namespace pokemon.Controllers
                     {
                         string jsonResult = response.Content.ReadAsStringAsync().Result;
 
-                        var templateData = new { Nom = "", Type = Entities.PokemonType.Normal};
+                        var templateData = new { Id = 0, Nom = "", Type = Entities.PokemonType.Normal};
                         var randomTemplate = JsonConvert.DeserializeAnonymousType(jsonResult, templateData);
 
                         // Create a new Pokemon using the retrieved template and provided trainer ID
@@ -124,6 +125,7 @@ namespace pokemon.Controllers
                         (
                             0,
                             -1,
+                            randomTemplate!.Id,
                             randomTemplate!.Nom,
                             randomTemplate!.Type,
                             false
@@ -161,6 +163,7 @@ namespace pokemon.Controllers
                 Entities.Pokemon newPokemon = new Entities.Pokemon(
                     newId,
                     trainerId,
+                    randomTemplate.IdPokedex,
                     randomTemplate.Nom,
                     randomTemplate.Type,
                     ShouldPokemonBeShiny()
@@ -194,7 +197,7 @@ namespace pokemon.Controllers
                     {
                         string jsonResult = response.Content.ReadAsStringAsync().Result;
 
-                        var templateData = new { Nom = "", Type = Entities.PokemonType.Normal };
+                        var templateData = new {Id = 0, Nom = "", Type = Entities.PokemonType.Normal };
                         var pokemonTemplate = JsonConvert.DeserializeAnonymousType(jsonResult, templateData);
 
                         if (pokemonTemplate == null)
@@ -206,6 +209,7 @@ namespace pokemon.Controllers
                         Entities.Pokemon templatePokemon = new Entities.Pokemon(
                             0,
                             -1,
+                            pokemonTemplate!.Id,
                             pokemonTemplate!.Nom,
                             pokemonTemplate!.Type,
                             false // Set the Shiny property as needed
@@ -230,7 +234,7 @@ namespace pokemon.Controllers
         private bool ShouldPokemonBeShiny()
         {
             Random random = new Random();
-            return random.Next(512) == 0; // Probability of 1/512
+            return random.Next(16) == 0; // Probability of 1/512
         }
     }
 }

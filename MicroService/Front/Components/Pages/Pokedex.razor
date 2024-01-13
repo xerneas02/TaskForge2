@@ -1,4 +1,5 @@
 ﻿@page "/pokedex"
+@using Front.Services
 
 <h3>Pokedex</h3>
 
@@ -13,14 +14,20 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Name</th>
+                <th>Numero</th>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Image</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var pokemon in pokedex)
             {
                 <tr>
-                    <td>@pokemon.Name</td>
+                    <td>@pokemon.Id</td>
+                    <td>@pokemon.Nom</td>
+                    <td><img src="@pokemon.TypeImageUrl" alt="@pokemon.Type" class="type"/></td>
+                    <td><img src="@pokemon.PokemonImageUrl" alt="@pokemon.Nom" class="pokemon" /></td>
                 </tr>
             }
         </tbody>
@@ -30,19 +37,26 @@ else
 @code {
     private PokemonTemplate[]? pokedex;
 
+    [Inject]
+    private HttpClient HttpClient { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(100);
-        pokedex = new[] { new PokemonTemplate { Name = "Limonde" },
-                          new PokemonTemplate { Name = "Melokrick"}
-        };
+        pokedex = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>("http://localhost:5227/api/PokemonTemplate");
+        
+        foreach (var pokemon in pokedex)
+        {
+            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon.Type)-1).ToString()}.png";
+            pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{pokemon.Id:D4}.png";
+        }
     }
-
 
     private class PokemonTemplate
     {
-        public string? Name { get; set; }
+        public int Id { get; set; }
+        public string? Nom { get; set; }
+        public PokemonType? Type { get; set; }
+        public string? TypeImageUrl { get; set; }
+        public string? PokemonImageUrl { get; set; }
     }
-
 }
