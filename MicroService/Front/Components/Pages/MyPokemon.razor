@@ -1,6 +1,9 @@
 ﻿@page "/myPokemons"
 
 @inject AuthenticationStateProvider authStateProvider
+@inject IJSRuntime JSRuntime
+@using Microsoft.JSInterop
+
 @using System
 @using System.Collections.Generic
 @using System.Linq
@@ -40,6 +43,7 @@ else
                 <th>Nom</th>
                 <th>Type</th>
                 <th>Image</th>
+                <th>Action</th> <!-- Ajout de la colonne d'action -->
             </tr>
         </thead>
         <tbody>
@@ -48,7 +52,7 @@ else
                 <tr>
                     <td>@pokemon.IdPokedex</td>
                     <td>@pokemon.Nom</td>
-                    <td><img src="@pokemon.TypeImageUrl" alt="@pokemon.Type" class="type" /></td>
+                    <td><img src="@pokemon.TypeImageUrl" alt="@((PokemonType?) (pokemon.Type - 1))" class="type" /></td>
                     <td>
                         <div style="display: flex; align-items: center;">
                             <img src="@pokemon.PokemonImageUrl" alt="@pokemon.Nom" class="pokemon" />
@@ -57,6 +61,9 @@ else
                                 <img src="Images/shinyStar.png" alt="Shiny Star" class="star" style="margin-left: 5px;" />
                             }
                         </div>
+                    </td>
+                    <td>
+                        <button @onclick="() => ReleasePokemon(pokemon.Id)">Relâcher</button>
                     </td>
                 </tr>
             }
@@ -88,9 +95,9 @@ else
 
         foreach (var pokemon in myPokemon!)
         {
-            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
-            if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
-            else pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
+            pokemon.TypeImageUrl = $"Images/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
+            if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"Images/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
+            else pokemon.PokemonImageUrl = $"Images/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
         }
     }
 
@@ -131,6 +138,46 @@ else
                 selectedTypes![i] = myPokemon!.Any(p => p.Type.HasValue && (int)p.Type == i+1 && IsValidTypeIndex(i+1));
             }
         }
+    }
+
+    private async Task ReleasePokemon(int pokemonId)
+    {
+        var pokemonToDelete = myPokemon?.FirstOrDefault(p => p.Id == pokemonId);
+
+        if (pokemonToDelete == null)
+        {
+            return;
+        }
+
+        if (pokemonToDelete.Shiny && !await ConfirmShinyRelease())
+        {
+            return;
+        }
+
+        var response = await HttpClient!.DeleteAsync($"http://localhost:5228/api/Pokemon/{pokemonId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+            foreach (var pokemon in myPokemon!)
+            {
+                pokemon.TypeImageUrl = $"Images/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
+                if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"Images/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
+                else pokemon.PokemonImageUrl = $"Images/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
+            }
+
+            StateHasChanged();
+        }
+        else
+        {
+            var errorMessage = $"Erreur lors de la suppression du Pokémon avec l'ID {pokemonId}.";
+            Console.WriteLine(errorMessage);
+        }
+    }
+
+    private async Task<bool> ConfirmShinyRelease()
+    {
+        return await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir relâcher ce Pokémon shiny?");
     }
 
 }

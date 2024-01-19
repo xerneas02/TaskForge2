@@ -75,15 +75,15 @@
                     shiny = lastAddedPokemon.Shiny;
                     if(!lastAddedPokemon.Shiny)
                     {
-                        pokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{lastAddedPokemon.IdPokedex:D4}.png";
+                        pokemonImageUrl = $"Images/pokemonImages/regular/%23{lastAddedPokemon.IdPokedex:D4}.png";
                     }
                     else
                     {
-                        pokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/shiny/%23{lastAddedPokemon.IdPokedex:D4}.png";
+                        pokemonImageUrl = $"Images/pokemonImages/shiny/%23{lastAddedPokemon.IdPokedex:D4}.png";
                     }
 
                     // Mettre à jour l'URL de l'image du type du Pokémon
-                    typeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)lastAddedPokemon.Type)-1).ToString()}.png";
+                    typeImageUrl = $"Images/pokemonImages/type/{(((int)lastAddedPokemon.Type)-1).ToString()}.png";
                 }
             }
             else

@@ -48,8 +48,8 @@ else
         
         foreach (var pokemon in pokedex!)
         {
-            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon.Type!)-1).ToString()}.png";
-            pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{pokemon.Id:D4}.png";
+            pokemon.TypeImageUrl = $"Images/pokemonImages/type/{(((int)pokemon.Type!)-1).ToString()}.png";
+            pokemon.PokemonImageUrl = $"Images/pokemonImages/regular/%23{pokemon.Id:D4}.png";
         }
     }
 
