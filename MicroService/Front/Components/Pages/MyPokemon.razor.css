@@ -59,6 +59,11 @@ label {
     height: auto;
 }
 
+.star {
+    max-width: 10%;
+    height: auto;
+}
+
 .table td {
     text-align: center; /* Center the content horizontally */
     vertical-align: middle; /* Center the content vertically */

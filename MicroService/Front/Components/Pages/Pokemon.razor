@@ -9,24 +9,36 @@
 @using Front.Services
 @using Newtonsoft.Json
 
-<h3>Obtenir un Pokemon.</h3>
+<h3>Obtenir un Pokemon</h3>
 
-<button @onclick="AjouterPokemon">Ajouter un Pokemon</button>
+<div class="botPad"><button @onclick="AjouterPokemon">Ajouter un Pokemon</button></div>
+
+<br />
 
 @if (!string.IsNullOrEmpty(pokemonImageUrl))
 {
-    <img src="@pokemonImageUrl" alt="Pokemon Image" />
+    <div class="leftPad">
+        <img src="@pokemonImageUrl" alt="Pokemon Image" />
+        @if (shiny)
+        {
+            <img src="Images/shinyStar.png" alt="Star" />
+        }
+    </div>
 }
 
 @if (!string.IsNullOrEmpty(typeImageUrl))
 {
-    <img src="@typeImageUrl" alt="Type Image" />
+    <div class="leftPad">
+       <img src="@typeImageUrl" alt="Type Image" />
+    </div>
 }
 
 @code {
     private string? userId;
     private string pokemonImageUrl;
     private string typeImageUrl;
+
+    private bool shiny = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,10 +72,15 @@
                 if (lastAddedPokemon != null)
                 {
                     // Mettre à jour l'URL de l'image du Pokémon
+                    shiny = lastAddedPokemon.Shiny;
                     if(!lastAddedPokemon.Shiny)
+                    {
                         pokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{lastAddedPokemon.IdPokedex:D4}.png";
+                    }
                     else
+                    {
                         pokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/shiny/%23{lastAddedPokemon.IdPokedex:D4}.png";
+                    }
 
                     // Mettre à jour l'URL de l'image du type du Pokémon
                     typeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)lastAddedPokemon.Type)-1).ToString()}.png";

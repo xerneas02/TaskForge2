@@ -49,7 +49,15 @@ else
                     <td>@pokemon.IdPokedex</td>
                     <td>@pokemon.Nom</td>
                     <td><img src="@pokemon.TypeImageUrl" alt="@pokemon.Type" class="type" /></td>
-                    <td><img src="@pokemon.PokemonImageUrl" alt="@pokemon.Nom" class="pokemon" /></td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            <img src="@pokemon.PokemonImageUrl" alt="@pokemon.Nom" class="pokemon" />
+                            @if (pokemon.Shiny)
+                            {
+                                <img src="Images/shinyStar.png" alt="Shiny Star" class="star" style="margin-left: 5px;" />
+                            }
+                        </div>
+                    </td>
                 </tr>
             }
         </tbody>
