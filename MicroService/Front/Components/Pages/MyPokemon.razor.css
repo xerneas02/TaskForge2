@@ -1,0 +1,97 @@
+﻿/* Add this CSS to your component or in a separate .css file */
+
+/* Body Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+}
+
+/* Container Styles */
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styles */
+h3 {
+    color: #333;
+}
+
+/* Button Styles */
+button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+}
+
+/* Checkbox Styles */
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    border: 1px solid #ffffff;
+    padding: 8px;
+    text-align: left;
+}
+
+/* Alternate Row Background Color */
+.table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+.pokemon {
+    max-width: 10%;
+    height: auto;
+}
+
+.table td {
+    text-align: center; /* Center the content horizontally */
+    vertical-align: middle; /* Center the content vertically */
+}
+
+img.pokemon {
+    max-width: 10%;
+    height: auto;
+}
+
+/* Image Styles */
+.type, .pokemon {
+    background-color: transparent; /* Remove the white background */
+    display: inline-block; /* Ensure inline-block display for vertical alignment */
+}
+
+/* Loading Styles */
+.loading {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .table th, .table td {
+        font-size: 12px;
+    }
+
+    .type, .pokemon {
+        max-width: 30px;
+    }
+}

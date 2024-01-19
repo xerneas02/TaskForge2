@@ -3,23 +3,23 @@ namespace Front.Services
     public enum PokemonType
     {
         Normal,
-        Fire,
-        Water,
-        Electric,
-        Grass,
-        Ice,
-        Fighting,
+        Feu,
+        Eau,
+        Electrique,
+        Plante,
+        Glace,
+        Combat,
         Poison,
-        Ground,
-        Flying,
-        Psychic,
-        Bug,
-        Rock,
-        Ghost,
+        Sol,
+        Vol,
+        Psy,
+        Insecte,
+        Roche,
+        Sprectre,
         Dragon,
-        Dark,
-        Steel,
-        Fairy
+        Tenebre,
+        Acier,
+        Fee
     }
 
     public class PokemonService
@@ -32,7 +32,7 @@ namespace Front.Services
         public string Nom { get; set; }
         public PokemonType Type { get; set; }
 
-        public PokemonService(int id, int trainerId = -1, int idPokedex = 0, string nom = "Tiplouf", PokemonType type = PokemonType.Water, bool shiny = false)
+        public PokemonService(int id, int trainerId = -1, int idPokedex = 0, string nom = "Tiplouf", PokemonType type = PokemonType.Eau, bool shiny = false)
         {
             Id = id;
             TrainerId = trainerId;
