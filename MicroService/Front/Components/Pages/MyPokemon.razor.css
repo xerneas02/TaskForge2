@@ -1,6 +1,4 @@
-﻿/* Add this CSS to your component or in a separate .css file */
-
-/* Body Styles */
+﻿/* Body Styles */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #ffffff;
@@ -30,11 +28,16 @@ button {
     cursor: pointer;
 }
 
-/* Checkbox Styles */
-label {
-    display: block;
-    margin-bottom: 10px;
+.type-row {
+    display: flex;
+    flex-wrap: wrap;
 }
+
+.type-checkbox {
+    flex: 0 0 22%; /* 22% to allow some space between checkboxes */
+    margin-bottom: 10px; /* Optional: Add margin to space out the checkboxes */
+}
+
 
 /* Table Styles */
 .table {
@@ -51,15 +54,10 @@ label {
 
 /* Alternate Row Background Color */
 .table tbody tr:nth-child(even) {
-    background-color: #ffffff;
+    background-color: #ffffff; /* Change to a light gray color */
 }
 
-.pokemon {
-    max-width: 10%;
-    height: auto;
-}
-
-.star {
+.pokemon, .star {
     max-width: 10%;
     height: auto;
 }
@@ -67,11 +65,6 @@ label {
 .table td {
     text-align: center; /* Center the content horizontally */
     vertical-align: middle; /* Center the content vertically */
-}
-
-img.pokemon {
-    max-width: 10%;
-    height: auto;
 }
 
 /* Image Styles */

@@ -10,7 +10,7 @@
 @using System.Security.Claims
 @using Front.Services
 
-<h3>Mes Pokemons</h3>
+<h2>Mes Pokemons</h2>
 
 <PageTitle>Mes Pokemons</PageTitle>
 <body>
@@ -19,13 +19,21 @@
     @if (showFilterOptions)
     {
         <div>
-            @foreach (var type in Enum.GetValues(typeof(PokemonType)))
-            {
-                <label>
-                    <input type="checkbox" @bind="selectedTypes![(int)type]" />
-                    @type.ToString()
-                </label>
-            }
+            <h3>Types</h3>
+            <div class="type-row">
+                @foreach (var type in Enum.GetValues(typeof(PokemonType)))
+                {
+                    <label class="type-checkbox">
+                        <input type="checkbox" @bind="selectedTypes![(int)type]" />
+                        @type.ToString()
+                    </label>
+                }
+            </div>
+            <h3>Shiny</h3>
+            <label>
+                <input type="checkbox" @bind="showOnlyShiny" />
+                Shiny
+            </label>
         </div>
     }
 </div>
@@ -43,7 +51,7 @@ else
                 <th>Nom</th>
                 <th>Type</th>
                 <th>Image</th>
-                <th>Action</th> <!-- Ajout de la colonne d'action -->
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -77,6 +85,7 @@ else
     private string? userId;
     private bool showFilterOptions = false;
     private bool[]? selectedTypes;
+    private bool showOnlyShiny = false;
 
     [Inject]
     private HttpClient? HttpClient { get; set; }
@@ -111,7 +120,11 @@ else
         get
         {
             return myPokemon!
-                .Where(p => p.Type.HasValue && IsValidTypeIndex((int)p.Type))
+                .Where(p => 
+                    p.Type.HasValue &&
+                    IsValidTypeIndex((int)p.Type) &&
+                    (!showOnlyShiny || (showOnlyShiny && p.Shiny))
+                )
                 .OrderBy(p => p.IdPokedex);
         }
     }
