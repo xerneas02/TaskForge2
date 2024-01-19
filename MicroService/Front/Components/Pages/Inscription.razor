@@ -31,21 +31,6 @@
         </div>
         <button type="submit">S'inscrire</button>
     </form>
-
-    @if (users != null)
-    {
-        <div>
-            <h4>Liste des e-mails des utilisateurs:</h4>
-            <div>@GetConcatenatedEmails()</div>
-        </div>
-    }
-    @if (users == null)
-    {
-        <div>
-            <h4>LError users</h4>
-        </div>
-    }
-
 </body>
 
 @code {
