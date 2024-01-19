@@ -18,8 +18,14 @@
     <button @onclick="ToggleFilterOptions">Modifier les filtres</button>
     @if (showFilterOptions)
     {
+        <br />
+        <input type="text" @bind="searchText" placeholder="Rechercher par nom" />
         <div>
             <h3>Types</h3>
+            <div class="button-container">
+                <button @onclick="DeselectAllTypes" class="deselect-button">Désélectionner tout</button>
+                <button @onclick="ResetFilter" class="reset-button">Réinitialiser</button>
+            </div>
             <div class="type-row">
                 @foreach (var type in Enum.GetValues(typeof(PokemonType)))
                 {
@@ -44,6 +50,7 @@
 }
 else
 {
+    <p>Nombre de Pokémon affichés: @FilteredPokemon.Count()</p>
     <table class="table">
         <thead>
             <tr>
@@ -86,6 +93,7 @@ else
     private bool showFilterOptions = false;
     private bool[]? selectedTypes;
     private bool showOnlyShiny = false;
+    private string searchText = "";
 
     [Inject]
     private HttpClient? HttpClient { get; set; }
@@ -123,7 +131,8 @@ else
                 .Where(p => 
                     p.Type.HasValue &&
                     IsValidTypeIndex((int)p.Type) &&
-                    (!showOnlyShiny || (showOnlyShiny && p.Shiny))
+                    (!showOnlyShiny || (showOnlyShiny && p.Shiny)) &&
+                    (string.IsNullOrWhiteSpace(searchText) || p.Nom?.StartsWith(searchText, StringComparison.OrdinalIgnoreCase) == true)
                 )
                 .OrderBy(p => p.IdPokedex);
         }
@@ -191,6 +200,24 @@ else
     private async Task<bool> ConfirmShinyRelease()
     {
         return await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir relâcher ce Pokémon shiny?");
+    }
+
+    private void DeselectAllTypes()
+    {
+        for (int i = 0; i < selectedTypes!.Length; i++)
+        {
+            selectedTypes[i] = false;
+        }
+    }
+
+    private void ResetFilter()
+    {
+        for (int i = 0; i < selectedTypes!.Length; i++)
+        {
+            selectedTypes[i] = true;
+        }
+        showOnlyShiny = false;
+        searchText = "";
     }
 
 }
