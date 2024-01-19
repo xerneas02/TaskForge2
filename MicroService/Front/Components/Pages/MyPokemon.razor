@@ -1,0 +1,126 @@
+﻿@page "/myPokemons"
+
+@inject AuthenticationStateProvider authStateProvider
+@using System
+@using System.Collections.Generic
+@using System.Linq
+@using System.Security.Claims
+@using Front.Services
+
+<h3>Mes Pokemons</h3>
+
+<PageTitle>Mes Pokemons</PageTitle>
+<body>
+<div>
+    <button @onclick="ToggleFilterOptions">Modifier les filtres</button>
+    @if (showFilterOptions)
+    {
+        <div>
+            @foreach (var type in Enum.GetValues(typeof(PokemonType)))
+            {
+                <label>
+                    <input type="checkbox" @bind="selectedTypes[(int)type]" />
+                    @type.ToString()
+                </label>
+            }
+        </div>
+    }
+</div>
+
+@if (myPokemon == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Numero</th>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pokemon in FilteredPokemon)
+            {
+                <tr>
+                    <td>@pokemon.IdPokedex</td>
+                    <td>@pokemon.Nom</td>
+                    <td><img src="@pokemon.TypeImageUrl" alt="@pokemon.Type" class="type" /></td>
+                    <td><img src="@pokemon.PokemonImageUrl" alt="@pokemon.Nom" class="pokemon" /></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+</body>
+
+@code {
+    private PokemonTemplate[]? myPokemon;
+    private string? userId;
+    private bool showFilterOptions = false;
+    private bool[] selectedTypes;
+
+    [Inject]
+    private HttpClient HttpClient { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        userId = user.FindFirst(ClaimTypes.SerialNumber)?.Value;
+        myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+
+        selectedTypes = new bool[Enum.GetValues(typeof(PokemonType)).Length];
+        Array.Fill(selectedTypes, true);
+
+        foreach (var pokemon in myPokemon!)
+        {
+            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon.Type) - 1).ToString()}.png";
+            if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
+            else pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
+        }
+    }
+
+    public bool IsValidTypeIndex(int index)
+    {
+        return index-1 >= 0 && index-1 < selectedTypes.Length && selectedTypes[index-1];
+    }
+
+    private IEnumerable<PokemonTemplate> FilteredPokemon
+    {
+        get
+        {
+            return myPokemon
+                .Where(p => p.Type.HasValue && IsValidTypeIndex((int)p.Type))
+                .OrderBy(p => p.IdPokedex);
+        }
+    }
+
+    public class PokemonTemplate
+    {
+        public int Id { get; set; }
+        public int IdPokedex { get; set; }
+        public bool Shiny { get; set; }
+        public string? Nom { get; set; }
+        public PokemonType? Type { get; set; }
+        public string? TypeImageUrl { get; set; }
+        public string? PokemonImageUrl { get; set; }
+    }
+
+    private void ToggleFilterOptions()
+    {
+        showFilterOptions = !showFilterOptions;
+
+        if (showFilterOptions)
+        {
+            for (int i = 0; i < Enum.GetValues(typeof(PokemonType)).Length; i++)
+            {
+                selectedTypes[i] = myPokemon.Any(p => p.Type.HasValue && (int)p.Type == i+1 && IsValidTypeIndex(i+1));
+            }
+        }
+    }
+
+}
