@@ -25,9 +25,9 @@ namespace Front.Services
             };
         }
 
-        public Task<HttpResponseMessage> TryLogin(string requestUrl)
+        public Task<HttpResponseMessage> TryLogin(string requestUrl, HttpContent content)
         {
-            return this._httpClient.GetAsync(requestUrl);
+            return this._httpClient.PostAsync(requestUrl, content);
         }
     }
 }

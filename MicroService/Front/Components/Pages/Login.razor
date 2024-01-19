@@ -3,7 +3,11 @@
 @inject NavigationManager NavigationManager
 @inject LoginService loginService
 @inject AuthenticationStateProvider authStateProvider
-
+@using System.Text.Json
+@using System.Net.Http
+@using System.Text
+@using Newtonsoft.Json
+@using System.Net
 <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
     <InputText @bind-Value="loginModel.Username" />
     <InputText @bind-Value="loginModel.Password" type="password" />
@@ -16,26 +20,46 @@
 
     private async void HandleLogin()
     {
-        var gatewayUrl = "http://localhost:5052/api/User";
-        var endpoint = "/login";
-        var requestUrl = $"{gatewayUrl}{endpoint}name={loginModel.Username}pass={loginModel.Password}";
+        var gatewayUrl = "http://localhost:5001";
+        var endpoint = "/api/Users/login";
+        var requestData = new
+        {
+            name = loginModel.Username,
+            pass = loginModel.Password
+        };
+        var jsonContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
+
         try
         {
-            // Effectuer la requête GET
-            HttpResponseMessage result = await loginService.TryLogin(requestUrl);
+            HttpResponseMessage result = await loginService.TryLogin($"{gatewayUrl}{endpoint}", jsonContent);
 
-            if(result.IsSuccessStatusCode)
+            if (result.IsSuccessStatusCode)
             {
-                Console.WriteLine("YES YES YES YES YES");
+                string responseBody = await result.Content.ReadAsStringAsync();
+                Console.WriteLine(responseBody);
+                UserDTO user = JsonConvert.DeserializeObject<UserDTO>(responseBody)!;
+                var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(user);
+                NavigationManager.NavigateTo("/");
             }
-            else{
-                Console.WriteLine("NON NON NON NON NON");
+            else
+            {
+                if (result.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("Échec de la connexion : Informations d'identification incorrectes.");
+                }
+                else
+                {
+                    Console.WriteLine($"Échec de la connexion. Code d'état : {result.StatusCode}");
+                }
             }
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"Erreur de requête HTTP : {ex.Message}");
         }
         catch (Exception ex)
         {
-            // Gérer les erreurs (par exemple, afficher un message d'erreur)
-            // ...
+            Console.WriteLine($"Une erreur inattendue s'est produite : {ex.Message}");
         }
     }
 

@@ -1,0 +1,84 @@
+@page "/pokemon"
+@using System.Text.RegularExpressions
+@inject HttpClient httpClient
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider authStateProvider
+@using System
+@using System.Security.Claims
+
+@using Front.Services
+@using Newtonsoft.Json
+
+<h3>Obtenir un Pokemon.</h3>
+
+<button @onclick="AjouterPokemon">Ajouter un Pokemon</button>
+
+@if (!string.IsNullOrEmpty(pokemonImageUrl))
+{
+    <img src="@pokemonImageUrl" alt="Pokemon Image" />
+}
+
+@if (!string.IsNullOrEmpty(typeImageUrl))
+{
+    <img src="@typeImageUrl" alt="Type Image" />
+}
+
+@code {
+    private string? userId;
+    private string pokemonImageUrl;
+    private string typeImageUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Récupérer l'ID de l'utilisateur à partir du contexte d'authentification
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        userId = user.FindFirst(ClaimTypes.SerialNumber)?.Value;
+    }
+
+    private async Task AjouterPokemon()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("userId is null");
+                return;
+            }
+
+            // Faire une requête GET vers le endpoint approprié pour ajouter un Pokemon
+            HttpResponseMessage response = await httpClient.PostAsync($"http://localhost:5228/api/Pokemon/AddRandomPokemon/{userId}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Récupérer les derniers Pokémons ajoutés du dresseur
+                IEnumerable<PokemonService>? pokemonsResponse = await httpClient.GetFromJsonAsync<IEnumerable<PokemonService>>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+
+                // Récupérer le dernier Pokémon ajouté
+                var lastAddedPokemon = pokemonsResponse?.OrderByDescending(p => p.Id).FirstOrDefault();
+
+                if (lastAddedPokemon != null)
+                {
+                    // Mettre à jour l'URL de l'image du Pokémon
+                    if(!lastAddedPokemon.Shiny)
+                        pokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{lastAddedPokemon.IdPokedex:D4}.png";
+                    else
+                        pokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/shiny/%23{lastAddedPokemon.IdPokedex:D4}.png";
+
+                    // Mettre à jour l'URL de l'image du type du Pokémon
+                    typeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)lastAddedPokemon.Type)-1).ToString()}.png";
+                }
+            }
+            else
+            {
+                // Afficher une alerte en cas d'erreur
+                await JSRuntime.InvokeVoidAsync("alert", "Une erreur s'est produite lors de l'ajout du Pokemon.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Gérer les exceptions
+            Console.WriteLine($"Une exception s'est produite : {ex.Message}");
+        }
+    }
+}

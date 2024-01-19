@@ -7,7 +7,6 @@ namespace pokemon.Data
         protected readonly IConfiguration Configuration;
         public DataContext(IConfiguration configuration)
         {
-
             Configuration = configuration;
         }
         protected override void OnConfiguring(DbContextOptionsBuilder options)

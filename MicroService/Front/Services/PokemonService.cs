@@ -1,6 +1,4 @@
-﻿using pokemon.Data;
-
-namespace pokemon.Entities
+namespace Front.Services
 {
     public enum PokemonType
     {
@@ -24,7 +22,7 @@ namespace pokemon.Entities
         Fairy
     }
 
-    public class Pokemon
+    public class PokemonService
     {
 
         public int Id { get; set; }
@@ -34,7 +32,7 @@ namespace pokemon.Entities
         public string Nom { get; set; }
         public PokemonType Type { get; set; }
 
-        public Pokemon(int id, int trainerId = -1, int idPokedex = 0, string nom = "Tiplouf", PokemonType type = PokemonType.Water, bool shiny = false)
+        public PokemonService(int id, int trainerId = -1, int idPokedex = 0, string nom = "Tiplouf", PokemonType type = PokemonType.Water, bool shiny = false)
         {
             Id = id;
             TrainerId = trainerId;
