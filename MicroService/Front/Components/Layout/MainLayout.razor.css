@@ -152,11 +152,11 @@ main {
     }
 
     /* Padding adjustments for the top row and article */
-    .top-row,
+    /* .top-row,
     article {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
-    }
+    } */
 }
 
 /* Styles for the Blazor error UI */
