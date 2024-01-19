@@ -24,8 +24,8 @@ namespace GatewayService.Controllers
     public class UserController : ControllerBase
     {
 
-        private readonly UserServiceContext _context;
-        private readonly PasswordHasher<User> _passwordHasher;
+        private readonly UserServiceContext? _context;
+        private readonly PasswordHasher<User>? _passwordHasher;
         private readonly IHttpClientFactory _httpClientFactory;
 
         public UserController(IHttpClientFactory httpClientFactory)
@@ -37,7 +37,7 @@ namespace GatewayService.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
-            return await _context.User
+            return await _context!.User
                 .Select(u => UserToDTO(u))
                 .ToListAsync();
         }
@@ -46,7 +46,7 @@ namespace GatewayService.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
-            var user = await _context.User.FindAsync(id);
+            var user = await _context!.User.FindAsync(id);
 
             if (user == null)
             {
@@ -65,7 +65,7 @@ namespace GatewayService.Controllers
                 return BadRequest();
             }
 
-            var user = await _context.User.FindAsync(id);
+            var user = await _context!.User.FindAsync(id);
 
             if (user == null)
             {
@@ -76,7 +76,7 @@ namespace GatewayService.Controllers
             if(userUdpate.Email != null) user.Email = userUdpate.Email;
 
             if(userUdpate.Password != null) {
-                user.PasswordHash = _passwordHasher.HashPassword(user, userUdpate.Password);
+                user.PasswordHash = _passwordHasher!.HashPassword(user, userUdpate.Password);
             }
 
             _context.Entry(user).State = EntityState.Modified;
@@ -151,7 +151,7 @@ namespace GatewayService.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.User.FindAsync(id);
+            var user = await _context!.User.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -165,7 +165,7 @@ namespace GatewayService.Controllers
 
         private bool UserExists(int id)
         {
-            return _context.User.Any(e => e.Id == id);
+            return _context!.User.Any(e => e.Id == id);
         }
 
         private static UserDTO UserToDTO(User user)

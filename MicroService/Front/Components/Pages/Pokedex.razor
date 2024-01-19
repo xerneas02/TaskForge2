@@ -38,15 +38,17 @@ else
     private PokemonTemplate[]? pokedex;
 
     [Inject]
-    private HttpClient HttpClient { get; set; }
+    private HttpClient? HttpClient { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        pokedex = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>("http://localhost:5227/api/PokemonTemplate");
+        pokedex = await HttpClient!.GetFromJsonAsync<PokemonTemplate[]>("http://localhost:5227/api/PokemonTemplate");
+
+        if (pokedex == null) throw new Exception("Error in loading pokemons.");
         
-        foreach (var pokemon in pokedex)
+        foreach (var pokemon in pokedex!)
         {
-            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon.Type)-1).ToString()}.png";
+            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon.Type!)-1).ToString()}.png";
             pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{pokemon.Id:D4}.png";
         }
     }

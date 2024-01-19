@@ -19,7 +19,7 @@
             @foreach (var type in Enum.GetValues(typeof(PokemonType)))
             {
                 <label>
-                    <input type="checkbox" @bind="selectedTypes[(int)type]" />
+                    <input type="checkbox" @bind="selectedTypes![(int)type]" />
                     @type.ToString()
                 </label>
             }
@@ -69,24 +69,26 @@ else
     private PokemonTemplate[]? myPokemon;
     private string? userId;
     private bool showFilterOptions = false;
-    private bool[] selectedTypes;
+    private bool[]? selectedTypes;
 
     [Inject]
-    private HttpClient HttpClient { get; set; }
+    private HttpClient? HttpClient { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         userId = user.FindFirst(ClaimTypes.SerialNumber)?.Value;
-        myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+        myPokemon = await HttpClient!.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+        
+        if (myPokemon == null) throw new Exception("Error in loading pokemons.");
 
         selectedTypes = new bool[Enum.GetValues(typeof(PokemonType)).Length];
         Array.Fill(selectedTypes, true);
 
         foreach (var pokemon in myPokemon!)
         {
-            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon.Type) - 1).ToString()}.png";
+            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
             if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
             else pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
         }
@@ -94,14 +96,14 @@ else
 
     public bool IsValidTypeIndex(int index)
     {
-        return index-1 >= 0 && index-1 < selectedTypes.Length && selectedTypes[index-1];
+        return index-1 >= 0 && index-1 < selectedTypes!.Length && selectedTypes![index-1];
     }
 
     private IEnumerable<PokemonTemplate> FilteredPokemon
     {
         get
         {
-            return myPokemon
+            return myPokemon!
                 .Where(p => p.Type.HasValue && IsValidTypeIndex((int)p.Type))
                 .OrderBy(p => p.IdPokedex);
         }
@@ -126,7 +128,7 @@ else
         {
             for (int i = 0; i < Enum.GetValues(typeof(PokemonType)).Length; i++)
             {
-                selectedTypes[i] = myPokemon.Any(p => p.Type.HasValue && (int)p.Type == i+1 && IsValidTypeIndex(i+1));
+                selectedTypes![i] = myPokemon!.Any(p => p.Type.HasValue && (int)p.Type == i+1 && IsValidTypeIndex(i+1));
             }
         }
     }

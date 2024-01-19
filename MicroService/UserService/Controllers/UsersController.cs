@@ -122,7 +122,7 @@ namespace UserService.Controllers
                 return NotFound();
             }
 
-            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, userLogin.Pass);
+            var passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash!, userLogin.Pass);
 
             if (passwordVerificationResult == PasswordVerificationResult.Success)
             {
