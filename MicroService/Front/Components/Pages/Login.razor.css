@@ -1,22 +1,31 @@
 /* Ajoutez ce CSS dans un fichier séparé ou dans la balise style de votre page Razor */
 
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    background-image: url('/Images/PokemonBG.png');
+    background-size: cover; /* Couvre entièrement l'élément */
+    background-position: center; /* Centre l'image dans l'élément */
+    /* background: linear-gradient(to bottom right, #023d71, #5aa9f2); */
 }
 
 .container {
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.6);
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    padding: 20px;
     width: 300px;
+    padding: 20px;
+    text-align: center;
 }
 
 .form-group {
@@ -47,13 +56,4 @@ button {
 
 button:hover {
     background-color: #45a049;
-}
-
-/* Ajout de styles Bootstrap pour des marges et un espacement approprié */
-.form-group {
-    margin-bottom: 1rem;
-}
-
-.mt-3 {
-    margin-top: 1rem !important;
 }
