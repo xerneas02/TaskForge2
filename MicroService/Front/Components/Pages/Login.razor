@@ -56,7 +56,7 @@
                 Console.WriteLine(responseBody);
                 UserDTO user = JsonConvert.DeserializeObject<UserDTO>(responseBody)!;
                 var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(user);
-                NavigationManager.NavigateTo("/");
+                NavigationManager.NavigateTo("/pokemon");
             }
             else
             {
