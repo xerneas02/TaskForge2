@@ -111,7 +111,7 @@
 
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    string usersApiUrl = "http://localhost:5001/api/Users/register";
+                    string usersApiUrl = "http://localhost:5000/api/User/register";
                     string jsonContent = JsonConvert.SerializeObject(newUser);
                     StringContent content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
