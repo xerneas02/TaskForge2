@@ -1,19 +1,29 @@
 body {
     margin: 0;
     padding: 0;
-    background: linear-gradient(to bottom right, #ffffff, #767575); /* Dégradé de blanc à gris */
+    /* background: linear-gradient(to bottom right, #ffffff, #767575); Dégradé de blanc à gris */
+    /* background: linear-gradient(to bottom right, #023d71, #5aa9f2); */
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    background-image: url('/Images/PokemonBG.png');
+    background-size: cover; /* Couvre entièrement l'élément */
+    background-position: center; /* Centre l'image dans l'élément */
 }
 
 form {
-    background-color: #ffffff;
+    /* background-color: #ffffff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); /* Ombre légère */
-    width: 300px; /* Ajustez la largeur selon vos besoins */
+    /*width: 300px; Ajustez la largeur selon vos besoins */
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    padding: 20px;
+    text-align: center;
 }
 
 input {

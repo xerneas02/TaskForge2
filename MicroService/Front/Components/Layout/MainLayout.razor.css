@@ -1,10 +1,31 @@
 /* Styles for the main page container */
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.article-container {
+    width: 100%;
+    height: 100vh; /* 100% de la hauteur de la vue (viewport) */
+    box-sizing: border-box; /* Pour inclure la bordure et le padding dans la largeur et la hauteur */
+    /* Autres styles selon vos besoins */
+}
+
+.article-content {
+    width: 100%;
+    height: 100%;
+    /* Autres styles selon vos besoins */
+}
+
 .page {
     position: relative;
     display: flex;
     flex-direction: column;
     color: #333; /* Couleur de la police principale */
-    background-image: url('PokemonBG.png');
+    
 }
 
 /* Styles for le dégradé pour la couleur de fond */
@@ -27,7 +48,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(180deg, #a6ffb6 0%, #cbfff6 70%); /* Dégradé de couleur de fond pastel */
+    background: linear-gradient(180deg, #105de3 0%, #66a9f5 70%); /* Dégradé de couleur de fond pastel */
     z-index: -1;
     opacity: 0.9; /* Opacité du dégradé */
 }
@@ -131,11 +152,11 @@ main {
     }
 
     /* Padding adjustments for the top row and article */
-    .top-row,
+    /* .top-row,
     article {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
-    }
+    } */
 }
 
 /* Styles for the Blazor error UI */

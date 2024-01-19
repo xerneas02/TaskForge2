@@ -2,18 +2,35 @@
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject LoginService loginService
+@* @inject GatewayService.Controllers.UserController *@
 @inject AuthenticationStateProvider authStateProvider
 @using System.Text.Json
 @using System.Net.Http
 @using System.Text
 @using Newtonsoft.Json
 @using System.Net
-<EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+@* <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
     <InputText @bind-Value="loginModel.Username" />
     <InputText @bind-Value="loginModel.Password" type="password" />
     <button type="submit">Login</button>
-</EditForm>
+</EditForm> *@
+<body>
+    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+        <div class="container">
+            <h1>Connexion</h1>
+            
+            <div class="form-group">
+                <InputText @bind-Value="loginModel.Username" class="form-control" id="username" placeholder="Nom d'utilisateur"/>
+            </div>
 
+            <div class="form-group">
+                <InputText @bind-Value="loginModel.Password" type="password" class="form-control" id="password" placeholder="Mot de passe"/>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Se connecter</button>
+        </div>
+    </EditForm>
+</body>
 @code {
     private LoginModel loginModel = new LoginModel();
 
@@ -39,7 +56,7 @@
                 Console.WriteLine(responseBody);
                 UserDTO user = JsonConvert.DeserializeObject<UserDTO>(responseBody)!;
                 var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(user);
-                NavigationManager.NavigateTo("/");
+                NavigationManager.NavigateTo("/pokemon");
             }
             else
             {

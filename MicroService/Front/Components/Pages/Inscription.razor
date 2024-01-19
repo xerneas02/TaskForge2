@@ -5,10 +5,10 @@
 @using System
 @using Newtonsoft.Json
 
-<h3>Inscription</h3>
 
 <body>
     <form @onsubmit="HandleFormSubmit">
+        <h3>Inscription</h3>
         <div>
             <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required @oninput="UpdateUsername" @onblur="(e) => ValidateUsername()" />
             <div style="color:red;">@usernameError</div>
@@ -31,7 +31,6 @@
         </div>
         <button type="submit">S'inscrire</button>
     </form>
-
 </body>
 
 @code {
