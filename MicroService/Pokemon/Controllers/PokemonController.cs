@@ -48,6 +48,21 @@ namespace pokemon.Controllers
             return Ok(trainerPokemons);
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePokemon(int id)
+        {
+            var pokemon = await _context.Pokemons.FindAsync(id);
+            if (pokemon == null)
+            {
+                return NotFound();
+            }
+
+            _context.Pokemons.Remove(pokemon);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         // POST api/<UserController>
         [HttpPost]
         public async Task<ActionResult<Entities.Pokemon>> PostPokemon(Entities.Pokemon pokemon)

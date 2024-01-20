@@ -1,6 +1,4 @@
-﻿/* Add this CSS to your component or in a separate .css file */
-
-/* Body Styles */
+﻿/* Body Styles */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #ffffff;
@@ -30,11 +28,33 @@ button {
     cursor: pointer;
 }
 
-/* Checkbox Styles */
-label {
-    display: block;
-    margin-bottom: 10px;
+.button-container {
+    margin-top: 10px;
 }
+
+.deselect-button, .reset-button {
+    background-color: #f44336; /* Red color for Désélectionner tout button */
+    color: #fff;
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.reset-button {
+    background-color: #2196F3; /* Blue color for Réinitialiser button */
+}
+
+.type-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.type-checkbox {
+    flex: 0 0 22%; /* 22% to allow some space between checkboxes */
+    margin-bottom: 10px; /* Optional: Add margin to space out the checkboxes */
+}
+
 
 /* Table Styles */
 .table {
@@ -44,19 +64,14 @@ label {
 }
 
 .table th, .table td {
-    border: 1px solid #ffffff;
+    border: 1px solid #ddd; /* Add a 1px solid border with a light gray color */
     padding: 8px;
     text-align: left;
 }
 
 /* Alternate Row Background Color */
 .table tbody tr:nth-child(even) {
-    background-color: #ffffff;
-}
-
-.pokemon {
-    max-width: 10%;
-    height: auto;
+    background-color: #ffffff; /* Change to a light gray color */
 }
 
 .table td {
@@ -64,9 +79,15 @@ label {
     vertical-align: middle; /* Center the content vertically */
 }
 
-img.pokemon {
-    max-width: 10%;
+
+.pokemon, .star {
+    max-width: 100px;
     height: auto;
+}
+
+.table td {
+    text-align: center; /* Center the content horizontally */
+    vertical-align: middle; /* Center the content vertically */
 }
 
 /* Image Styles */

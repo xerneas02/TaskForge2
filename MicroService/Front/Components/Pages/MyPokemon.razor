@@ -1,13 +1,16 @@
 ﻿@page "/myPokemons"
 
 @inject AuthenticationStateProvider authStateProvider
+@inject IJSRuntime JSRuntime
+@using Microsoft.JSInterop
+
 @using System
 @using System.Collections.Generic
 @using System.Linq
 @using System.Security.Claims
 @using Front.Services
 
-<h3>Mes Pokemons</h3>
+<h2>Mes Pokemons</h2>
 
 <PageTitle>Mes Pokemons</PageTitle>
 <body>
@@ -15,14 +18,28 @@
     <button @onclick="ToggleFilterOptions">Modifier les filtres</button>
     @if (showFilterOptions)
     {
+        <br />
+        <input type="text" @bind="searchText" placeholder="Rechercher par nom" />
         <div>
-            @foreach (var type in Enum.GetValues(typeof(PokemonType)))
-            {
-                <label>
-                    <input type="checkbox" @bind="selectedTypes[(int)type]" />
-                    @type.ToString()
-                </label>
-            }
+            <h3>Types</h3>
+            <div class="button-container">
+                <button @onclick="DeselectAllTypes" class="deselect-button">Désélectionner tout</button>
+                <button @onclick="ResetFilter" class="reset-button">Réinitialiser</button>
+            </div>
+            <div class="type-row">
+                @foreach (var type in Enum.GetValues(typeof(PokemonType)))
+                {
+                    <label class="type-checkbox">
+                        <input type="checkbox" @bind="selectedTypes![(int)type]" />
+                        @type.ToString()
+                    </label>
+                }
+            </div>
+            <h3>Shiny</h3>
+            <label>
+                <input type="checkbox" @bind="showOnlyShiny" />
+                Shiny
+            </label>
         </div>
     }
 </div>
@@ -33,6 +50,7 @@
 }
 else
 {
+    <p>Nombre de Pokémon affichés: @FilteredPokemon.Count()</p>
     <table class="table">
         <thead>
             <tr>
@@ -40,6 +58,7 @@ else
                 <th>Nom</th>
                 <th>Type</th>
                 <th>Image</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -48,8 +67,19 @@ else
                 <tr>
                     <td>@pokemon.IdPokedex</td>
                     <td>@pokemon.Nom</td>
-                    <td><img src="@pokemon.TypeImageUrl" alt="@pokemon.Type" class="type" /></td>
-                    <td><img src="@pokemon.PokemonImageUrl" alt="@pokemon.Nom" class="pokemon" /></td>
+                    <td><img src="@pokemon.TypeImageUrl" alt="@((PokemonType?) (pokemon.Type - 1))" class="type" /></td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            <img src="@pokemon.PokemonImageUrl" alt="@pokemon.Nom" class="pokemon" />
+                            @if (pokemon.Shiny)
+                            {
+                                <img src="Images/shinyStar.png" alt="Shiny Star" class="star" style="margin-left: 5px;" />
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <button @onclick="() => ReleasePokemon(pokemon.Id)">Relâcher</button>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -61,40 +91,49 @@ else
     private PokemonTemplate[]? myPokemon;
     private string? userId;
     private bool showFilterOptions = false;
-    private bool[] selectedTypes;
+    private bool[]? selectedTypes;
+    private bool showOnlyShiny = false;
+    private string searchText = "";
 
     [Inject]
-    private HttpClient HttpClient { get; set; }
+    private HttpClient? HttpClient { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         userId = user.FindFirst(ClaimTypes.SerialNumber)?.Value;
-        myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+        myPokemon = await HttpClient!.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+        
+        if (myPokemon == null) throw new Exception("Error in loading pokemons.");
 
         selectedTypes = new bool[Enum.GetValues(typeof(PokemonType)).Length];
         Array.Fill(selectedTypes, true);
 
         foreach (var pokemon in myPokemon!)
         {
-            pokemon.TypeImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/type/{(((int)pokemon.Type) - 1).ToString()}.png";
-            if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
-            else pokemon.PokemonImageUrl = $"https://perso.isima.fr/~maroubille/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
+            pokemon.TypeImageUrl = $"Images/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
+            if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"Images/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
+            else pokemon.PokemonImageUrl = $"Images/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
         }
     }
 
     public bool IsValidTypeIndex(int index)
     {
-        return index-1 >= 0 && index-1 < selectedTypes.Length && selectedTypes[index-1];
+        return index-1 >= 0 && index-1 < selectedTypes!.Length && selectedTypes![index-1];
     }
 
     private IEnumerable<PokemonTemplate> FilteredPokemon
     {
         get
         {
-            return myPokemon
-                .Where(p => p.Type.HasValue && IsValidTypeIndex((int)p.Type))
+            return myPokemon!
+                .Where(p => 
+                    p.Type.HasValue &&
+                    IsValidTypeIndex((int)p.Type) &&
+                    (!showOnlyShiny || (showOnlyShiny && p.Shiny)) &&
+                    (string.IsNullOrWhiteSpace(searchText) || p.Nom?.StartsWith(searchText, StringComparison.OrdinalIgnoreCase) == true)
+                )
                 .OrderBy(p => p.IdPokedex);
         }
     }
@@ -118,9 +157,67 @@ else
         {
             for (int i = 0; i < Enum.GetValues(typeof(PokemonType)).Length; i++)
             {
-                selectedTypes[i] = myPokemon.Any(p => p.Type.HasValue && (int)p.Type == i+1 && IsValidTypeIndex(i+1));
+                selectedTypes![i] = myPokemon!.Any(p => p.Type.HasValue && (int)p.Type == i+1 && IsValidTypeIndex(i+1));
             }
         }
+    }
+
+    private async Task ReleasePokemon(int pokemonId)
+    {
+        var pokemonToDelete = myPokemon?.FirstOrDefault(p => p.Id == pokemonId);
+
+        if (pokemonToDelete == null)
+        {
+            return;
+        }
+
+        if (pokemonToDelete.Shiny && !await ConfirmShinyRelease())
+        {
+            return;
+        }
+
+        var response = await HttpClient!.DeleteAsync($"http://localhost:5228/api/Pokemon/{pokemonId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+            foreach (var pokemon in myPokemon!)
+            {
+                pokemon.TypeImageUrl = $"Images/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
+                if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"Images/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
+                else pokemon.PokemonImageUrl = $"Images/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
+            }
+
+            StateHasChanged();
+        }
+        else
+        {
+            var errorMessage = $"Erreur lors de la suppression du Pokémon avec l'ID {pokemonId}.";
+            Console.WriteLine(errorMessage);
+        }
+    }
+
+    private async Task<bool> ConfirmShinyRelease()
+    {
+        return await JSRuntime.InvokeAsync<bool>("confirm", "Êtes-vous sûr de vouloir relâcher ce Pokémon shiny?");
+    }
+
+    private void DeselectAllTypes()
+    {
+        for (int i = 0; i < selectedTypes!.Length; i++)
+        {
+            selectedTypes[i] = false;
+        }
+    }
+
+    private void ResetFilter()
+    {
+        for (int i = 0; i < selectedTypes!.Length; i++)
+        {
+            selectedTypes[i] = true;
+        }
+        showOnlyShiny = false;
+        searchText = "";
     }
 
 }

@@ -1,0 +1,55 @@
+/* Add your custom styles here */
+
+h3 {
+    color: #000000; /* Set header color to a blue shade */
+}
+
+button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.botPad{
+    padding-bottom: 20px;
+}
+.leftPad{
+    padding-left: 20px;
+}
+
+img {
+    max-width: 200px; /* Make sure images don't exceed their container width */
+    height: auto; /* Maintain image aspect ratio */
+    margin-bottom: 10px;
+}
+
+/* Optional: Style for the shiny star image */
+img[alt="Star"] {
+    width: 100px; /* Adjust the width of the shiny star image */
+    margin-left: 5px; /* Add a small margin to separate it from the Pokemon image */
+}
+
+/* Optional: Add some styling for the Pokemon and Type images */
+img[alt="Pokemon Image"]{
+    border: 2px solid #ddd; /* Add a border to the Pokemon and Type images */
+    border-radius: 5px; /* Add rounded corners to the images */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+}
+
+/* Optional: Add styling for the alert */
+.alert {
+    background-color: #dc3545; /* Set alert background color to red */
+    color: #fff; /* Set alert text color to white */
+    padding: 10px 15px;
+    border-radius: 5px; /* Add rounded corners to the alert */
+    margin-bottom: 15px;
+}
+
+/* Optional: Add styling for the shiny star image within the alert */
+.alert img[alt="Star"] {
+    width: 15px; /* Adjust the width of the shiny star image within the alert */
+    margin-left: 5px; /* Add a small margin to separate it from the text */
+}
