@@ -5,6 +5,7 @@
 @inject AuthenticationStateProvider authStateProvider
 @using System
 @using System.Security.Claims
+@using System.Net.Http.Headers
 
 @using Front.Services
 @using Newtonsoft.Json
@@ -58,38 +59,51 @@
                 return;
             }
 
-            // Faire une requête GET vers le endpoint approprié pour ajouter un Pokemon
-            HttpResponseMessage response = await httpClient.PostAsync($"http://localhost:5228/api/Pokemon/AddRandomPokemon/{userId}", null);
-
-            if (response.IsSuccessStatusCode)
+            /* var JWT = await ((CustomAuthenticationStateProvider)authStateProvider).GetJWT();
+            if (JWT != null && JWT != "")
             {
-                // Récupérer les derniers Pokémons ajoutés du dresseur
-                IEnumerable<PokemonService>? pokemonsResponse = await httpClient.GetFromJsonAsync<IEnumerable<PokemonService>>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                    "Bearer",
+                    JWT
+                ); */
+                if (true){
+                // Faire une requête GET vers le endpoint approprié pour ajouter un Pokemon
+                HttpResponseMessage response = await httpClient.PostAsync($"http://localhost:5000/api/User/AddRandomPokemon/{userId}", null);
 
-                // Récupérer le dernier Pokémon ajouté
-                var lastAddedPokemon = pokemonsResponse?.OrderByDescending(p => p.Id).FirstOrDefault();
-
-                if (lastAddedPokemon != null)
+                if (response.IsSuccessStatusCode)
                 {
-                    // Mettre à jour l'URL de l'image du Pokémon
-                    shiny = lastAddedPokemon.Shiny;
-                    if(!lastAddedPokemon.Shiny)
-                    {
-                        pokemonImageUrl = $"Images/pokemonImages/regular/%23{lastAddedPokemon.IdPokedex:D4}.png";
-                    }
-                    else
-                    {
-                        pokemonImageUrl = $"Images/pokemonImages/shiny/%23{lastAddedPokemon.IdPokedex:D4}.png";
-                    }
+                    // Récupérer les derniers Pokémons ajoutés du dresseur
+                    IEnumerable<PokemonService>? pokemonsResponse = await httpClient.GetFromJsonAsync<IEnumerable<PokemonService>>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
 
-                    // Mettre à jour l'URL de l'image du type du Pokémon
-                    typeImageUrl = $"Images/pokemonImages/type/{(((int)lastAddedPokemon.Type)-1).ToString()}.png";
+                    // Récupérer le dernier Pokémon ajouté
+                    var lastAddedPokemon = pokemonsResponse?.OrderByDescending(p => p.Id).FirstOrDefault();
+
+                    if (lastAddedPokemon != null)
+                    {
+                        // Mettre à jour l'URL de l'image du Pokémon
+                        shiny = lastAddedPokemon.Shiny;
+                        if(!lastAddedPokemon.Shiny)
+                        {
+                            pokemonImageUrl = $"Images/pokemonImages/regular/%23{lastAddedPokemon.IdPokedex:D4}.png";
+                        }
+                        else
+                        {
+                            pokemonImageUrl = $"Images/pokemonImages/shiny/%23{lastAddedPokemon.IdPokedex:D4}.png";
+                        }
+
+                        // Mettre à jour l'URL de l'image du type du Pokémon
+                        typeImageUrl = $"Images/pokemonImages/type/{(((int)lastAddedPokemon.Type)-1).ToString()}.png";
+                    }
+                }
+                else
+                {
+                    // Afficher une alerte en cas d'erreur
+                    await JSRuntime.InvokeVoidAsync("alert", "Une erreur s'est produite lors de l'ajout du Pokemon.");
                 }
             }
             else
             {
-                // Afficher une alerte en cas d'erreur
-                await JSRuntime.InvokeVoidAsync("alert", "Une erreur s'est produite lors de l'ajout du Pokemon.");
+                await JSRuntime.InvokeVoidAsync("alert", "Le token JWT n'est inconnu côté client !");
             }
         }
         catch (Exception ex)

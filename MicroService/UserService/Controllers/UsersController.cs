@@ -127,6 +127,7 @@ namespace UserService.Controllers
             if (passwordVerificationResult == PasswordVerificationResult.Success)
             {
                 // Passwords match, authentication successful
+
                 return Ok(UserToDTO(user));
             }
             else

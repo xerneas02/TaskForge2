@@ -1,6 +1,5 @@
 ﻿using Front.Entities;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -29,6 +28,8 @@ namespace Front.Services
         {
             return this._httpClient.PostAsync(requestUrl, content);
         }
+
+        
     }
 }
 

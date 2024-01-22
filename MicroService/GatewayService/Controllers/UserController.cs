@@ -38,30 +38,30 @@ namespace GatewayService.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-    private string GenerateJwtToken(int userId)
-    {
-        var claims = new List<Claim>
+        private string GenerateJwtToken(int userId)
         {
-            // On ajoute un champ UserId dans notre token avec comme valeur userId en string
-            new Claim("UserId", userId.ToString()) 
-        };
+            var claims = new List<Claim>
+            {
+                // On ajoute un champ UserId dans notre token avec comme valeur userId en string
+                new Claim("UserId", userId.ToString()) 
+            };
 
-        // On créer la clé de chiffrement
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSecretKeyLongLongLongLongEnough"));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            // On créer la clé de chiffrement
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThomasIsReallySus"));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // On paramètre notre token
-        var token = new JwtSecurityToken(
-            issuer: "TodoProject", // Qui a émit le token
-            audience: "localhost:5000", // A qui est destiné ce token
-            claims: claims, // Les données que l'on veux encoder dans le token
-            expires: DateTime.Now.AddMinutes(3000), // Durée de validité
-            signingCredentials: creds); // La clé de chiffrement
+            // On paramètre notre token
+            var token = new JwtSecurityToken(
+                issuer: "PokemonManager", // Qui a émit le token
+                audience: "localhost:5000", // A qui est destiné ce token
+                claims: claims, // Les données que l'on veux encoder dans le token
+                expires: DateTime.Now.AddDays(7), // Durée de validité
+                signingCredentials: creds); // La clé de chiffrement
 
-        // On renvoie le token signé
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-                // GET: api/Users
+            // On renvoie le token signé
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
@@ -156,6 +156,7 @@ namespace GatewayService.Controllers
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())
             {
+                Console.WriteLine("Gateway login");
                 // Set the base address of the API you want to call
                 client.BaseAddress = new System.Uri("http://localhost:5001/");
 
@@ -166,8 +167,12 @@ namespace GatewayService.Controllers
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     // You can deserialize the response content here if needed
-                    var result = await response.Content.ReadFromJsonAsync<UserDTO>();
-                    return Ok(result);
+                    UserDTO result = await response.Content.ReadFromJsonAsync<UserDTO>();
+                    
+                    Console.WriteLine(result.ToString());
+                    string jwt = GenerateJwtToken(result.Id);
+                    var userAndToken = new JWTAndUser() { Token = jwt, User = result };
+                    return Ok(userAndToken);
                 }
                 else
                 {
@@ -189,6 +194,26 @@ namespace GatewayService.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("AddRandomPokemon/{trainerId}")]
+        public async Task<IActionResult> AddRandomPokemon(int trainerId)
+        {
+            Console.WriteLine(trainerId);
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = $"http://localhost:5228/api/Pokemon/AddRandomPokemon/{trainerId}";
+
+                HttpResponseMessage reponse = await httpClient.PostAsync(usersApiUrl, null);
+
+                if (reponse.IsSuccessStatusCode)
+                    
+                    return Ok();
+                else
+                {
+                    throw new Exception($"Echec de la requete a la gateway. Status code: {reponse.StatusCode}");
+                }
+            }
         }
 
         private bool UserExists(int id)
