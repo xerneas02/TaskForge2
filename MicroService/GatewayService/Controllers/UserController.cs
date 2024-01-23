@@ -9,7 +9,6 @@ using UserService.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.Net.Http.Json;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 
 namespace GatewayService.Controllers
@@ -168,9 +167,13 @@ namespace GatewayService.Controllers
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     // You can deserialize the response content here if needed
-                    UserDTO result = await response.Content.ReadFromJsonAsync<UserDTO>();
+                    UserDTO? result = await response.Content.ReadFromJsonAsync<UserDTO>();
                     
-                    Console.WriteLine(result.ToString());
+                    if(result == null)
+                    {
+                        return BadRequest("Login failed");
+                    }
+
                     string jwt = GenerateJwtToken(result.Id);
                     var userAndToken = new JWTAndUser() { Token = jwt, User = result };
                     return Ok(userAndToken);
@@ -232,17 +235,5 @@ namespace GatewayService.Controllers
                 Email = user.Email,
             };
         }
-
-
-        // [Authorize]
-        // [HttpGet]
-        // public Task Authent()
-        // {
-        //     // On récupère la donnée encodé dans le champ UserId
-        //     var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-        //     // on vérifie qu'elle existe bien
-        //     if (UserId == null) return  new ForbidResult();
-        //     return Task.CompletedTask;
-        // }
     }
 }
