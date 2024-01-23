@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.Net.Http.Json;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GatewayService.Controllers
 {
@@ -47,7 +48,7 @@ namespace GatewayService.Controllers
             };
 
             // On créer la clé de chiffrement
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThomasIsReallySus"));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThomasIsReallySus12345678901234567890"));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             // On paramètre notre token
@@ -196,10 +197,11 @@ namespace GatewayService.Controllers
             return NoContent();
         }
 
+        [Authorize]
         [HttpPost("AddRandomPokemon/{trainerId}")]
         public async Task<IActionResult> AddRandomPokemon(int trainerId)
         {
-            Console.WriteLine(trainerId);
+            // Console.WriteLine("GateWay Pokemon" + trainerId);
             using (HttpClient httpClient = new HttpClient())
             {
                 string usersApiUrl = $"http://localhost:5228/api/Pokemon/AddRandomPokemon/{trainerId}";
@@ -231,5 +233,16 @@ namespace GatewayService.Controllers
             };
         }
 
+
+        // [Authorize]
+        // [HttpGet]
+        // public Task Authent()
+        // {
+        //     // On récupère la donnée encodé dans le champ UserId
+        //     var UserId = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+        //     // on vérifie qu'elle existe bien
+        //     if (UserId == null) return  new ForbidResult();
+        //     return Task.CompletedTask;
+        // }
     }
 }

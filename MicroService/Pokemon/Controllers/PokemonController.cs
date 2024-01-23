@@ -82,7 +82,7 @@ namespace pokemon.Controllers
             //{
                 // Retrieve a random Pokemon template from the PokemonTemplate microservice
                 Entities.Pokemon randomTemplate = GetRandomPokemonTemplate();
-                Console.WriteLine("6TEST");
+                // Console.WriteLine("6TEST");
 
                 IEnumerable<Entities.Pokemon> allPokemons = await _context.Pokemons.ToListAsync();
 
@@ -104,7 +104,6 @@ namespace pokemon.Controllers
                 _context.Pokemons.Add(newPokemon);
                 await _context.SaveChangesAsync();
 
-                Console.WriteLine(newPokemon);
                 // Return the newly created Pokemon
                 return CreatedAtAction(nameof(GetPokemon), new { id = newPokemon.Id }, newPokemon);
             //}

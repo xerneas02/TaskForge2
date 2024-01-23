@@ -59,14 +59,13 @@
                 return;
             }
 
-            /* var JWT = await ((CustomAuthenticationStateProvider)authStateProvider).GetJWT();
+            var JWT = await ((CustomAuthenticationStateProvider)authStateProvider).GetJWT();
             if (JWT != null && JWT != "")
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                     "Bearer",
                     JWT
-                ); */
-                if (true){
+                );
                 // Faire une requête GET vers le endpoint approprié pour ajouter un Pokemon
                 HttpResponseMessage response = await httpClient.PostAsync($"http://localhost:5000/api/User/AddRandomPokemon/{userId}", null);
 
