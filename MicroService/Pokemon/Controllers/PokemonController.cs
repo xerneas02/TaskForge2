@@ -78,11 +78,9 @@ namespace pokemon.Controllers
         [HttpPost("AddRandomPokemon/{trainerId}")]
         public async Task<ActionResult<Entities.Pokemon>> AddRandomPokemon(int trainerId)
         {
-            //try
-            //{
-                // Retrieve a random Pokemon template from the PokemonTemplate microservice
+            try
+            {
                 Entities.Pokemon randomTemplate = GetRandomPokemonTemplate();
-                // Console.WriteLine("6TEST");
 
                 IEnumerable<Entities.Pokemon> allPokemons = await _context.Pokemons.ToListAsync();
 
@@ -90,7 +88,6 @@ namespace pokemon.Controllers
 
                 int newId = maxId + 1;
 
-                // Create a new Pokemon using the retrieved template and provided trainer ID
                 Entities.Pokemon newPokemon = new Entities.Pokemon(
                     newId,
                     trainerId,
@@ -100,25 +97,22 @@ namespace pokemon.Controllers
                     ShouldPokemonBeShiny()
                 );
 
-                // Add the new Pokemon to the Pokemon microservice database
                 _context.Pokemons.Add(newPokemon);
                 await _context.SaveChangesAsync();
 
-                // Return the newly created Pokemon
                 return CreatedAtAction(nameof(GetPokemon), new { id = newPokemon.Id }, newPokemon);
-            //}
-            //catch (Exception ex)
-            //{
-                // Handle any exceptions that might occur during the process
-            //    return BadRequest($"An error occurred: {ex.Message}");
-            //}
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest($"An error occurred: {ex.Message}");
+            }
         }
 
         private Entities.Pokemon GetRandomPokemonTemplate()
         {
-            //try
-            //{
-                // Make an HTTP request to the PokemonTemplate microservice endpoint
+            try
+            {
                 using (HttpClient httpClient = new HttpClient())
                 {
                     string pokemonTemplateApiUrl = "http://localhost:5227/api/pokemonTemplate/random";
@@ -131,7 +125,6 @@ namespace pokemon.Controllers
                         var templateData = new { Id = 0, Nom = "", Type = Entities.PokemonType.Normal};
                         var randomTemplate = JsonConvert.DeserializeAnonymousType(jsonResult, templateData);
 
-                        // Create a new Pokemon using the retrieved template and provided trainer ID
                         if (randomTemplate == null)
                         {
                             throw new Exception($"Failed to retrieve random Pokemon template. Status code: {response.StatusCode}");
@@ -153,12 +146,11 @@ namespace pokemon.Controllers
                         throw new Exception($"Failed to retrieve random Pokemon template. Status code: {response.StatusCode}");
                     }
                 }
-            //}
-            //catch (Exception ex)
-            //{
-                // Handle any exceptions that might occur during the process
-            //    throw new Exception($"An error occurred while getting a random Pokemon template: {ex.Message}");
-            //}
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error occurred while getting a random Pokemon template: {ex.Message}");
+            }
         }
 
         [HttpPost("AddPokemonFromTemplate")]
@@ -250,7 +242,7 @@ namespace pokemon.Controllers
         private bool ShouldPokemonBeShiny()
         {
             Random random = new Random();
-            return random.Next(16) == 0; // Probability of 1/512
+            return random.Next(16) == 0; // Probability of 1/16
         }
     }
 }
