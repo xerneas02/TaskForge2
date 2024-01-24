@@ -2,3 +2,15 @@ img.pokemon {
     max-width: 10%;
     height: auto;
 }
+
+/* .table{
+    overflow-y:scroll;
+
+} */
+.scrollable
+{
+    overflow-y:scroll;
+    display: block;
+    height: 50%;
+    width: 100%;
+}

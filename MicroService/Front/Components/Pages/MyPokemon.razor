@@ -10,15 +10,17 @@
 @using System.Security.Claims
 @using Front.Services
 
-<h2>Mes Pokemons</h2>
+<h3>Mes Pokemons</h3>
 
 <PageTitle>Mes Pokemons</PageTitle>
 <body>
-<div>
+<div class="container">
     <button @onclick="ToggleFilterOptions">Modifier les filtres</button>
     @if (showFilterOptions)
     {
         <br />
+        <br />
+
         <input type="text" @bind="searchText" placeholder="Rechercher par nom" />
         <div>
             <h3>Types</h3>

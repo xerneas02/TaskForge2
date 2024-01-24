@@ -21,6 +21,14 @@ a, .btn-link {
     padding: 0! important;
 }
 
+article {
+    height: auto !important;
+}
+
+h3{
+    text-align: center;
+}
+
 h1:focus {
     outline: none;
 }

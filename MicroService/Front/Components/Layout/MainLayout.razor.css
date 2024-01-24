@@ -78,6 +78,10 @@ main {
     background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
 }
 
+.hello-text{
+    margin-top: auto;
+}
+
 /* Styles for the top row */
 .top-row {
     background-color: #f7f7f7;
