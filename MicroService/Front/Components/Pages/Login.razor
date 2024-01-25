@@ -28,12 +28,17 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Se connecter</button>
+            @if (showErrorMessage)
+            {
+                <p style="color:red;">Votre adresse email ou votre mot de passe est incorrecte</p>
+            }
         </div>
+        
     </EditForm>
 </body>
 @code {
     private LoginModel loginModel = new LoginModel();
-
+    private bool showErrorMessage = false;
 
     private async void HandleLogin()
     {
@@ -52,6 +57,7 @@
 
             if (result.IsSuccessStatusCode)
             {
+                showErrorMessage = false;
                 string responseBody = await result.Content.ReadAsStringAsync();
 
                 JWTAndUser tokenAndUser = JsonConvert.DeserializeObject<JWTAndUser>(responseBody)!;
@@ -62,11 +68,15 @@
             {
                 if (result.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    Console.WriteLine("Échec de la connexion : Informations d'identification incorrectes.");
+                    showErrorMessage = true;
+                    Console.WriteLine($"Échec de la connexion : Informations d'identification incorrectes. {showErrorMessage}");
+                    StateHasChanged();
                 }
                 else
                 {
+                    showErrorMessage = true;
                     Console.WriteLine($"Échec de la connexion. Code d'état : {result.StatusCode}");
+                    StateHasChanged();
                 }
             }
         }
