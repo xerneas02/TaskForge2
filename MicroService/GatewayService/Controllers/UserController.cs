@@ -216,7 +216,6 @@ namespace GatewayService.Controllers
         [HttpPost("AddRandomPokemon/{trainerId}")]
         public async Task<IActionResult> AddRandomPokemon(int trainerId)
         {
-            // Console.WriteLine("GateWay Pokemon" + trainerId);
             using (HttpClient httpClient = new HttpClient())
             {
                 string usersApiUrl = $"http://localhost:5228/api/Pokemon/AddRandomPokemon/{trainerId}";
@@ -237,7 +236,6 @@ namespace GatewayService.Controllers
         [HttpDelete("pokemon/{pokemonId}")]
         public async Task<IActionResult> ReleasePokemon(int pokemonId)
         {
-            Console.WriteLine("GateWay Pokemon" );
             using (HttpClient httpClient = new HttpClient())
             {
                 string usersApiUrl = $"http://localhost:5228/api/Pokemon/{pokemonId}";
@@ -260,10 +258,31 @@ namespace GatewayService.Controllers
         [HttpGet("trainer/{trainerId}")]
         public async Task<ActionResult<IEnumerable<Pokemon>>> GetPokemonsOfTrainer(int trainerId)
         {
-            // Console.WriteLine("GateWay Pokemon" + trainerId);
             using (HttpClient httpClient = new HttpClient())
             {
                 string usersApiUrl = $"http://localhost:5228/api/Pokemon/trainer/{trainerId}";
+
+                HttpResponseMessage reponse = await httpClient.GetAsync(usersApiUrl);
+
+                if (reponse.IsSuccessStatusCode)
+                {
+                    var result = await reponse.Content.ReadFromJsonAsync<IEnumerable<Pokemon>>();
+                    return Ok(result);
+                }
+                else
+                {
+                    throw new Exception($"Echec de la requete a la gateway. Status code: {reponse.StatusCode}");
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpGet("pokedex")]
+        public async Task<ActionResult<IEnumerable<Pokemon>>> GetPokedex()
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = "http://localhost:5227/api/PokemonTemplate";
 
                 HttpResponseMessage reponse = await httpClient.GetAsync(usersApiUrl);
 

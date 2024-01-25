@@ -106,7 +106,21 @@ else
         var authState = await authStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         userId = user.FindFirst(ClaimTypes.SerialNumber)?.Value;
-        myPokemon = await HttpClient!.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+
+        var JWT = await ((CustomAuthenticationStateProvider)authStateProvider).GetJWT();
+        if (JWT != null && JWT != "")
+        {
+            HttpClient!.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Bearer",
+                JWT
+            );
+        }
+        else
+        {
+            throw new Exception("Le JWT est null !");
+        }
+
+        myPokemon = await HttpClient!.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5000/api/User/trainer/{userId}");
 
         if (myPokemon == null) throw new Exception("Error in loading pokemons.");
 
@@ -178,33 +192,26 @@ else
         {
             return;
         }
-        var JWT = await ((CustomAuthenticationStateProvider)authStateProvider).GetJWT();
-        if (JWT != null && JWT != "")
+
+        var response = await HttpClient!.DeleteAsync($"http://localhost:5000/api/User/pokemon/{pokemonId}");
+        //var response = await HttpClient!.DeleteAsync($"http://localhost:5228/api/Pokemon/{pokemonId}");
+
+        if (response.IsSuccessStatusCode)
         {
-            HttpClient!.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                "Bearer",
-                JWT
-            );
-            var response = await HttpClient!.DeleteAsync($"http://localhost:5000/api/User/pokemon/{pokemonId}");
-            //var response = await HttpClient!.DeleteAsync($"http://localhost:5228/api/Pokemon/{pokemonId}");
-
-            if (response.IsSuccessStatusCode)
+            myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5000/api/User/trainer/{userId}");
+            foreach (var pokemon in myPokemon!)
             {
-                myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5000/api/User/trainer/{userId}");
-                foreach (var pokemon in myPokemon!)
-                {
-                    pokemon.TypeImageUrl = $"Images/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
-                    if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"Images/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
-                    else pokemon.PokemonImageUrl = $"Images/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
-                }
+                pokemon.TypeImageUrl = $"Images/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
+                if (!pokemon.Shiny) pokemon.PokemonImageUrl = $"Images/pokemonImages/regular/%23{pokemon.IdPokedex:D4}.png";
+                else pokemon.PokemonImageUrl = $"Images/pokemonImages/shiny/%23{pokemon.IdPokedex:D4}.png";
+            }
 
-                StateHasChanged();
-            }
-            else
-            {
-                var errorMessage = $"Erreur lors de la suppression du Pokémon avec l'ID {pokemonId}.";
-                Console.WriteLine(errorMessage);
-            }
+            StateHasChanged();
+        }
+        else
+        {
+            var errorMessage = $"Erreur lors de la suppression du Pokémon avec l'ID {pokemonId}.";
+            Console.WriteLine(errorMessage);
         }
     }
 

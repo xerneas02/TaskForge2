@@ -1,5 +1,8 @@
 ﻿@page "/pokedex"
+
+@inject AuthenticationStateProvider authStateProvider
 @using Front.Services
+@using System.Net.Http.Headers
 
 <h3>Pokedex</h3>
 
@@ -44,7 +47,20 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        pokedex = await HttpClient!.GetFromJsonAsync<PokemonTemplate[]>("http://localhost:5227/api/PokemonTemplate");
+        var JWT = await ((CustomAuthenticationStateProvider)authStateProvider).GetJWT();
+        if (JWT != null && JWT != "")
+        {
+            HttpClient!.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Bearer",
+                JWT
+            );
+        }
+        else
+        {
+            throw new Exception("Le JWT est null !");
+        }
+        pokedex = await HttpClient!.GetFromJsonAsync<PokemonTemplate[]>("http://localhost:5000/api/User/pokedex");
+        //pokedex = await HttpClient!.GetFromJsonAsync<PokemonTemplate[]>("http://localhost:5227/api/PokemonTemplate");
 
         if (pokedex == null) throw new Exception("Error in loading pokemons.");
         
