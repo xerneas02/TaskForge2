@@ -33,13 +33,24 @@ namespace GatewayService.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-                // GET: api/Users
+        // GET: api/User
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
-            return await _context.User
-                .Select(u => UserToDTO(u))
-                .ToListAsync();
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = "http://localhost:5001/api/Users";
+                HttpResponseMessage reponse = httpClient.GetAsync(usersApiUrl).Result;
+                Console.WriteLine($"My response is: {reponse}\n My response code is : {reponse.IsSuccessStatusCode}");
+
+                if (!reponse.IsSuccessStatusCode)
+                    throw new Exception($"Failed to getUser user. Status code: {reponse.StatusCode}");
+                else
+                {
+                    var result = await reponse.Content.ReadFromJsonAsync<IEnumerable<UserDTO>>();
+                    return Ok(result);
+                }
+            }
         }
 
         // GET: api/Users/5
