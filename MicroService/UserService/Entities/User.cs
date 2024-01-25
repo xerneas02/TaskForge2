@@ -1,4 +1,5 @@
 ﻿
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json.Linq;
 
@@ -19,8 +20,11 @@ namespace UserService.Entities
 
     public class UserDTO
     {
+        [JsonPropertyName("id")]
         public int Id { get; set; }
+        [JsonPropertyName("name")]
         public string? Name { get; set; }
+        [JsonPropertyName("email")]
         public string? Email { get; set; }
     }
 

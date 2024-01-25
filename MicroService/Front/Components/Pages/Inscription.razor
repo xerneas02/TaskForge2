@@ -78,7 +78,7 @@
         {
             using (HttpClient httpClient = new HttpClient())
             {
-                string usersApiUrl = "http://localhost:5001/api/Users";
+                string usersApiUrl = "http://localhost:5000/api/User";
                 HttpResponseMessage response = httpClient.GetAsync(usersApiUrl).Result;
 
                 if (response.IsSuccessStatusCode)
