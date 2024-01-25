@@ -221,6 +221,29 @@ namespace GatewayService.Controllers
             }
         }
 
+        [Authorize]
+        [HttpGet("trainer/{trainerId}")]
+        public async Task<ActionResult<IEnumerable<Pokemon>>> GetPokemonsOfTrainer(int trainerId)
+        {
+            // Console.WriteLine("GateWay Pokemon" + trainerId);
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = $"http://localhost:5228/api/Pokemon/trainer/{trainerId}";
+
+                HttpResponseMessage reponse = await httpClient.GetAsync(usersApiUrl);
+
+                if (reponse.IsSuccessStatusCode)
+                {
+                    var result = await reponse.Content.ReadFromJsonAsync<IEnumerable<Pokemon>>();
+                    return Ok(result);
+                }
+                else
+                {
+                    throw new Exception($"Echec de la requete a la gateway. Status code: {reponse.StatusCode}");
+                }
+            }
+        }
+
         private bool UserExists(int id)
         {
             return _context!.User.Any(e => e.Id == id);

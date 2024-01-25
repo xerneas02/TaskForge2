@@ -72,7 +72,8 @@
                 if (response.IsSuccessStatusCode)
                 {
                     // Récupérer les derniers Pokémons ajoutés du dresseur
-                    IEnumerable<PokemonService>? pokemonsResponse = await httpClient.GetFromJsonAsync<IEnumerable<PokemonService>>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+                    //IEnumerable<PokemonService>? pokemonsResponse = await httpClient.GetFromJsonAsync<IEnumerable<PokemonService>>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+                    IEnumerable<PokemonService>? pokemonsResponse = await httpClient.GetFromJsonAsync<IEnumerable<PokemonService>>($"http://localhost:5000/api/User/trainer/{userId}");
 
                     // Récupérer le dernier Pokémon ajouté
                     var lastAddedPokemon = pokemonsResponse?.OrderByDescending(p => p.Id).FirstOrDefault();
