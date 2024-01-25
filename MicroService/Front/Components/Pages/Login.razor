@@ -37,8 +37,8 @@
 
     private async void HandleLogin()
     {
-        var gatewayUrl = "http://localhost:5001";
-        var endpoint = "/api/Users/login";
+        var gatewayUrl = "http://localhost:5000";
+        var endpoint = "/api/User/login";
         var requestData = new
         {
             name = loginModel.Username,
@@ -53,9 +53,9 @@
             if (result.IsSuccessStatusCode)
             {
                 string responseBody = await result.Content.ReadAsStringAsync();
-                Console.WriteLine(responseBody);
-                UserDTO user = JsonConvert.DeserializeObject<UserDTO>(responseBody)!;
-                var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(user);
+
+                JWTAndUser tokenAndUser = JsonConvert.DeserializeObject<JWTAndUser>(responseBody)!;
+                var userClaim = await ((CustomAuthenticationStateProvider)authStateProvider).MarkUserAsAuthenticated(tokenAndUser.User, tokenAndUser.Token);
                 NavigationManager.NavigateTo("/pokemon");
             }
             else

@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Security.Claims;
+using System.Text;
 using UserService.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.Net.Http.Json;
-using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GatewayService.Controllers
 {
@@ -24,13 +29,37 @@ namespace GatewayService.Controllers
     public class UserController : ControllerBase
     {
 
-        private readonly UserServiceContext _context;
-        private readonly PasswordHasher<User> _passwordHasher;
+        private readonly UserServiceContext? _context;
+        private readonly PasswordHasher<User>? _passwordHasher;
         private readonly IHttpClientFactory _httpClientFactory;
 
         public UserController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
+        }
+
+        private string GenerateJwtToken(int userId)
+        {
+            var claims = new List<Claim>
+            {
+                // On ajoute un champ UserId dans notre token avec comme valeur userId en string
+                new Claim("UserId", userId.ToString()) 
+            };
+
+            // On créer la clé de chiffrement
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThomasIsReallySus12345678901234567890"));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            // On paramètre notre token
+            var token = new JwtSecurityToken(
+                issuer: "PokemonManager", // Qui a émit le token
+                audience: "localhost:5000", // A qui est destiné ce token
+                claims: claims, // Les données que l'on veux encoder dans le token
+                expires: DateTime.Now.AddDays(7), // Durée de validité
+                signingCredentials: creds); // La clé de chiffrement
+
+            // On renvoie le token signé
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         // GET: api/User
@@ -57,7 +86,7 @@ namespace GatewayService.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
-            var user = await _context.User.FindAsync(id);
+            var user = await _context!.User.FindAsync(id);
 
             if (user == null)
             {
@@ -76,7 +105,7 @@ namespace GatewayService.Controllers
                 return BadRequest();
             }
 
-            var user = await _context.User.FindAsync(id);
+            var user = await _context!.User.FindAsync(id);
 
             if (user == null)
             {
@@ -87,7 +116,7 @@ namespace GatewayService.Controllers
             if(userUdpate.Email != null) user.Email = userUdpate.Email;
 
             if(userUdpate.Password != null) {
-                user.PasswordHash = _passwordHasher.HashPassword(user, userUdpate.Password);
+                user.PasswordHash = _passwordHasher!.HashPassword(user, userUdpate.Password);
             }
 
             _context.Entry(user).State = EntityState.Modified;
@@ -139,6 +168,7 @@ namespace GatewayService.Controllers
             // Create an HttpClient instance using the factory
             using (var client = _httpClientFactory.CreateClient())
             {
+                Console.WriteLine("Gateway login");
                 // Set the base address of the API you want to call
                 client.BaseAddress = new System.Uri("http://localhost:5001/");
 
@@ -149,8 +179,16 @@ namespace GatewayService.Controllers
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     // You can deserialize the response content here if needed
-                    var result = await response.Content.ReadFromJsonAsync<UserDTO>();
-                    return Ok(result);
+                    UserDTO? result = await response.Content.ReadFromJsonAsync<UserDTO>();
+                    
+                    if(result == null)
+                    {
+                        return BadRequest("Login failed");
+                    }
+
+                    string jwt = GenerateJwtToken(result.Id);
+                    var userAndToken = new JWTAndUser() { Token = jwt, User = result };
+                    return Ok(userAndToken);
                 }
                 else
                 {
@@ -162,7 +200,7 @@ namespace GatewayService.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.User.FindAsync(id);
+            var user = await _context!.User.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -174,9 +212,53 @@ namespace GatewayService.Controllers
             return NoContent();
         }
 
+        [Authorize]
+        [HttpPost("AddRandomPokemon/{trainerId}")]
+        public async Task<IActionResult> AddRandomPokemon(int trainerId)
+        {
+            // Console.WriteLine("GateWay Pokemon" + trainerId);
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = $"http://localhost:5228/api/Pokemon/AddRandomPokemon/{trainerId}";
+
+                HttpResponseMessage reponse = await httpClient.PostAsync(usersApiUrl, null);
+
+                if (reponse.IsSuccessStatusCode)
+                    
+                    return Ok();
+                else
+                {
+                    throw new Exception($"Echec de la requete a la gateway. Status code: {reponse.StatusCode}");
+                }
+            }
+        }
+
+        [Authorize]
+        [HttpGet("trainer/{trainerId}")]
+        public async Task<ActionResult<IEnumerable<Pokemon>>> GetPokemonsOfTrainer(int trainerId)
+        {
+            // Console.WriteLine("GateWay Pokemon" + trainerId);
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = $"http://localhost:5228/api/Pokemon/trainer/{trainerId}";
+
+                HttpResponseMessage reponse = await httpClient.GetAsync(usersApiUrl);
+
+                if (reponse.IsSuccessStatusCode)
+                {
+                    var result = await reponse.Content.ReadFromJsonAsync<IEnumerable<Pokemon>>();
+                    return Ok(result);
+                }
+                else
+                {
+                    throw new Exception($"Echec de la requete a la gateway. Status code: {reponse.StatusCode}");
+                }
+            }
+        }
+
         private bool UserExists(int id)
         {
-            return _context.User.Any(e => e.Id == id);
+            return _context!.User.Any(e => e.Id == id);
         }
 
         private static UserDTO UserToDTO(User user)
@@ -188,6 +270,5 @@ namespace GatewayService.Controllers
                 Email = user.Email,
             };
         }
-
     }
 }
