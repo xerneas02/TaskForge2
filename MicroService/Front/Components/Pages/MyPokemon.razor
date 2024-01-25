@@ -190,7 +190,7 @@ else
 
             if (response.IsSuccessStatusCode)
             {
-                myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5228/api/Pokemon/trainer/{userId}");
+                myPokemon = await HttpClient.GetFromJsonAsync<PokemonTemplate[]>($"http://localhost:5000/api/User/trainer/{userId}");
                 foreach (var pokemon in myPokemon!)
                 {
                     pokemon.TypeImageUrl = $"Images/pokemonImages/type/{(((int)pokemon!.Type!) - 1).ToString()}.png";
