@@ -234,6 +234,29 @@ namespace GatewayService.Controllers
         }
 
         [Authorize]
+        [HttpDelete("pokemon/{pokemonId}")]
+        public async Task<IActionResult> ReleasePokemon(int pokemonId)
+        {
+            Console.WriteLine("GateWay Pokemon" );
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string usersApiUrl = $"http://localhost:5228/api/Pokemon/{pokemonId}";
+
+                HttpResponseMessage reponse = await httpClient.DeleteAsync(usersApiUrl);
+
+                if (reponse.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Pokemon {pokemonId} supprimé");
+                    return Ok();
+                }
+                else
+                {
+                    throw new Exception($"Echec de la requete a la gateway. Status code: {reponse.StatusCode}");
+                }
+            }
+        }
+
+        [Authorize]
         [HttpGet("trainer/{trainerId}")]
         public async Task<ActionResult<IEnumerable<Pokemon>>> GetPokemonsOfTrainer(int trainerId)
         {
